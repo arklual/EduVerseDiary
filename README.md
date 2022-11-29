@@ -1,0 +1,1 @@
+# school33-diary
