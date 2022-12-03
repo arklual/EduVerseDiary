@@ -1,1 +1,1 @@
-# school33-diary
+# EduVerse
