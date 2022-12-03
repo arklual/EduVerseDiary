@@ -1,96 +1,43 @@
-import requests
-from bs4 import BeautifulSoup
-from settings import *
-from student import *
-import telebot
+from api.settings import TELEGRAM_TOKEN, LAST_NAMES
+from api.school33api import School33Api
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
+from aiogram.utils.markdown import hbold, hunderline
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-def sign_in():
-    cookies = {
-        'csrftoken': 'FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM',
-        'class_id': '3962',
-        'period': 'p_114',
-        'subject_id': '272',
-        'group_type_id': '1',
-    }
-    headers = {
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Upgrade-Insecure-Requests': '1',
-        'Origin': 'http://93.181.225.54',
-        'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Referer': 'http://93.181.225.54/accounts/login/?next=/',
-        'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-        # Requests sorts cookies= alphabetically
-        # 'Cookie': 'csrftoken=FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM; class_id=3962; period=p_114; subject_id=272; group_type_id=1',
-    }
-    data = {
-        'csrfmiddlewaretoken': 'W2IsoDfkAYxbL5NgnoBwLYDHgaR86JqhE0nDIu613LsNVLQbtHrgKxr6UGRuAaNT',
-        'next': '/',
-        'username': '03326174',
-        'password': '747698',
-        'submit': '\u0412\u043E\u0439\u0442\u0438',
-    }
-    ses = requests.session()
-    ses.post('http://93.181.225.54/accounts/login/', headers=headers,
-             cookies=cookies, data=data, verify=False)
-    return ses
+bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
+api = School33Api()
+@dp.message_handler(commands=['start'])
+async def process_start_command(message: types.Message):
+    await message.answer(f'Привет, {message.from_user.first_name}. Ты уже прочитал описание и знаешь, чем я могу тебе помочь.\n' 
+    + 'Если вдруг ты не прочитал описание, то я твой электронный дневник, но только в телеграмме и более крутой. \n\n ' +
+    "📍 " + hbold(' Что я могу?') + '\n'
+    + '🚩 К сожелению, пока только присылать твои оценки в данном триместре по запросу (но актуальные, в отличие от официального дневника)' + '\n' +
+    '🚩 Но скоро я смогу присылать тебе новые оценки в тот момент, когда ты их получаешь и ' + hunderline('много чего ещё') + ' (пока сохраним это в интриге) ' + 
+    'С помощью меня ты сможешь понять, что у тебя получается лучше,  а что хуже.\n\n'
+    '🆘\nСправка: /help', parse_mode='HTML'
+    )
 
+@dp.message_handler(commands=['help'])
+async def help_user(message: types.Message):
+    await message.answer("""Вот команды, которые доступны нашему боту.
+    /get_marks - узнать о твоих текущих оценках в этом триместре""")
 
-def get_students(session):
-    students = []
-    cookies = {
-        'class_id': '3962',
-        'period': 'p_114',
-        'group_type_id': '1',
-        'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-        'subject_id': '3',
-    }
-    headers = {
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-        'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-    }
-    response = session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                           headers=headers, cookies=cookies, verify=False)
-    soup = BeautifulSoup(response.text)
-    user_rows = soup.find_all('div', {'id': 'user-rows'})
-    users = user_rows[1].find_all('div')
-    for user in users:
-        students.append(Student(user.text.strip(), user.get('name')[1:]))
-    return students
-
-bot = telebot.TeleBot("5099099475:AAHNWwVNOoPR6oPELEntSy3UMlv8y2EZTTI", parse_mode='HTML')
-
-@bot.message_handler(commands=['start'])
-def start_message(message):
-    bot.send_message(message.chat.id, 'Добро пожаловать. Для получения оценок введите /marks')
-    
-@bot.message_handler(commands=['marks'])
-def get_lastname(message):
-    msg1 = bot.send_message(message.chat.id, 'Введите вашу фамилию')
-    bot.register_next_step_handler(msg1, send_marks)
-
-def send_marks(message):
-    last_name = message.text
-    bot.send_message(message.chat.id, 'Загружаем Ваши отметки, подождите(процесс может занять 1 минуту)')
-    session = sign_in()
-    students = get_students(session)
-    students = add_english_group(session, students)
-    students = add_math_group(session, students)
-    students = add_marks(session, SUBJECTS, students)
-    students = add_english_info_marks(
-        session, SUBJECTS_ENGLISH_1, SUBJECTS_ENGLISH_2, students)
-    students = add_math_marks(session, SUBJECTS_MATH_1, SUBJECTS_MATH_2, students)
-    
-    for st in students:
+@dp.message_handler(commands=['get_marks'])
+async def send_marks(message: types.Message):
+    last_name = LAST_NAMES[message.from_id]
+    await message.answer('Загружаем твои отметки, подождите (процесс может занять 1 минуту)')
+    api.update_marks()
+    for st in api.students:
         if st.name.split(' ')[1] == last_name:
-            bot.send_message(message.chat.id, 'Ваши оценки:')
+            await message.answer('Твои оценки:')
             for subject in st.subjects:
-                bot.send_message(message.chat.id, f'{subject.name} {subject.average_mark} {subject.marks}')
+                await message.answer(f'{subject.name} {subject.average_mark} {subject.marks}')
 
-bot.polling(none_stop=True, interval=0)
+    
+
+if __name__ == '__main__':
+    executor.start_polling(dp)
