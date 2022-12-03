@@ -42,14 +42,14 @@ class School33Api:
         self.__add_marks()
 
     def __sign_in(self):
-        __cookies = {
+        cookies = {
             'csrftoken': 'FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM',
             'class_id': CLASS_ID,
             'period': PERIOD_ID,
             'subject_id': '272',
             'group_type_id': '1',
         }
-        __headers = {
+        headers = {
             'Connection': 'keep-alive',
             'Cache-Control': 'max-age=0',
             'Upgrade-Insecure-Requests': '1',
@@ -59,7 +59,7 @@ class School33Api:
             'Referer': 'http://93.181.225.54/accounts/login/?next=/',
             'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
         }
-        __data = {
+        data = {
             'csrfmiddlewaretoken': 'W2IsoDfkAYxbL5NgnoBwLYDHgaR86JqhE0nDIu613LsNVLQbtHrgKxr6UGRuAaNT',
             'next': '/',
             'username': USERNAME,
@@ -67,7 +67,7 @@ class School33Api:
             'submit': '\u0412\u043E\u0439\u0442\u0438',
         }
         ses = requests.session()
-        ses.post('http://93.181.225.54/accounts/login/', headers=self.__headers,cookies=self.__cookies, data=self.__data, verify=False)
+        ses.post('http://93.181.225.54/accounts/login/', headers=headers,cookies=cookies, data=data, verify=False)
         return ses
 
     def __get_students(self):
