@@ -25,7 +25,7 @@ class Subject:
         return f'{self.name} {self.average_mark} {self.marks}'
 
 
-class School33Api:    
+class School33Api:   
     def __init__(self):
         self.__session = self.__sign_in()
         self.__students = self.__get_students()
@@ -42,23 +42,7 @@ class School33Api:
         self.__add_marks()
 
     def __sign_in(self):
-        cookies = {
-            'csrftoken': 'FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM',
-            'class_id': CLASS_ID,
-            'period': PERIOD_ID,
-            'subject_id': '272',
-            'group_type_id': '1',
-        }
-        headers = {
-            'Connection': 'keep-alive',
-            'Cache-Control': 'max-age=0',
-            'Upgrade-Insecure-Requests': '1',
-            'Origin': 'http://93.181.225.54',
-            'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Referer': 'http://93.181.225.54/accounts/login/?next=/',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-        }
+        cookies = self.__get_cookies(csrf='FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM', subject_id='272')
         data = {
             'csrfmiddlewaretoken': 'W2IsoDfkAYxbL5NgnoBwLYDHgaR86JqhE0nDIu613LsNVLQbtHrgKxr6UGRuAaNT',
             'next': '/',
@@ -66,28 +50,15 @@ class School33Api:
             'password': PASSWORD,
             'submit': '\u0412\u043E\u0439\u0442\u0438',
         }
+        headers = self.__get_headers('http://93.181.225.54/accounts/login/?next=/')
         ses = requests.session()
         ses.post('http://93.181.225.54/accounts/login/', headers=headers,cookies=cookies, data=data, verify=False)
         return ses
 
     def __get_students(self):
         students = []
-        cookies = {
-            'class_id': CLASS_ID,
-            'period': PERIOD_ID,
-            'group_type_id': '1',
-            'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-            'subject_id': '3',
-        }
-        headers = {
-            'Connection': 'keep-alive',
-            'Cache-Control': 'max-age=0',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-        }
+        cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='3')
+        headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
         soup = BeautifulSoup(response.text)
@@ -99,22 +70,8 @@ class School33Api:
 
     def __add_marks(self):
         for subject in SUBJECTS:
-            cookies = {
-                'class_id': CLASS_ID,
-                'period': PERIOD_ID,
-                'group_type_id': '1',
-                'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-                'subject_id': f'{subject["id"]}',
-            }
-            headers = {
-                'Connection': 'keep-alive',
-                'Cache-Control': 'max-age=0',
-                'Upgrade-Insecure-Requests': '1',
-                'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-                'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-            }
+            cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id=subject['id'])
+            headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
 
@@ -132,22 +89,8 @@ class School33Api:
 
     def __add_english_group(self):
         students_en = []
-        cookies = {
-            'class_id': CLASS_ID,
-            'period': PERIOD_ID,
-            'group_type_id': '1',
-            'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-            'subject_id': '202',
-        }
-        headers = {
-            'Connection': 'keep-alive',
-            'Cache-Control': 'max-age=0',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-        }
+        cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='202', class_id=SUBJECTS_ENGLISH_1['class_id'])
+        headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
         soup = BeautifulSoup(response.text)
@@ -170,22 +113,8 @@ class School33Api:
                 students_en_2.append(student)
 
         for subject in SUBJECTS_ENGLISH_2:
-            cookies = {
-                'class_id': f'{subject["class_id"]}',
-                'period': 'p_114',
-                'group_type_id': '1',
-                'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-                'subject_id': f'{subject["id"]}',
-            }
-            headers = {
-                'Connection': 'keep-alive',
-                'Cache-Control': 'max-age=0',
-                'Upgrade-Insecure-Requests': '1',
-                'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-                'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-            }
+            cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+            headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
             soup = BeautifulSoup(response.text)
@@ -200,22 +129,8 @@ class School33Api:
                             sub.marks.append(int(m))
 
         for subject in SUBJECTS_ENGLISH_1:
-            cookies = {
-                'class_id': f'{subject["class_id"]}',
-                'period': 'p_114',
-                'group_type_id': '1',
-                'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
-                'subject_id': f'{subject["id"]}',
-            }
-            headers = {
-                'Connection': 'keep-alive',
-                'Cache-Control': 'max-age=0',
-                'Upgrade-Insecure-Requests': '1',
-                'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'Referer': 'http://93.181.225.54/educ_proc/ep_marks/',
-                'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-            }
+            cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+            headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
             soup = BeautifulSoup(response.text)
@@ -231,5 +146,25 @@ class School33Api:
 
         self.__students = sorted(students_en_1+students_en_2)
 
+    def __get_cookies(self, csrf, subject_id, class_id = CLASS_ID):
+        cookies = {
+            'class_id': str(class_id),
+            'period': str(PERIOD_ID),
+            'group_type_id': '1',
+            'csrftoken': str(csrf),
+            'subject_id': str(subject_id),
+        }
+        return cookies
 
-    
+    def __get_headers(self, referer):
+        headers = {
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=0',
+            'Upgrade-Insecure-Requests': '1',
+            'Origin': 'http://93.181.225.54',
+            'User-Agent': 'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Referer': str(referer),
+            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+        }
+        return headers
