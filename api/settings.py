@@ -12,10 +12,6 @@ SUBJECTS = [
         'id': '24',
     },
     {
-        'name': 'Физкультура',
-        'id': '32',
-    },
-    {
         'name': 'География',
         'id': '20',
     },
@@ -40,28 +36,20 @@ SUBJECTS = [
         'id': '210',
     },
     {
-        'name': 'ОДНКНР',
-        'id': '272',
-    },
-    {
-        'name': 'Китайский язык',
-        'id': '208',
-    },
-    {
-        'name': 'История России',
-        'id': '37',
+        'name': 'История',
+        'id': '13',
     },
 ]
 
 SUBJECTS_ENGLISH_1 = [
     {
         'name': 'Английский',
-        'class_id': '4278',
+        'class_id': '4448',
         'id': '202',
     },
     {
         'name': 'Информатика',
-        'class_id': '4280',
+        'class_id': '4449',
         'id': '31',
     },
 ]
@@ -69,12 +57,12 @@ SUBJECTS_ENGLISH_1 = [
 SUBJECTS_ENGLISH_2 = [
     {
         'name': 'Английский',
-        'class_id': '4277',
+        'class_id': '4447',
         'id': '202',
     },
     {
         'name': 'Информатика',
-        'class_id': '4279',
+        'class_id': '4450',
         'id': '31',
     },
 ]
@@ -82,10 +70,10 @@ SUBJECTS_ENGLISH_2 = [
 
 
 TELEGRAM_TOKEN = '5067489447:AAGP1UVmfaMX-4lxgi3EdVzBRTtFGq5j9Lo'
-CLASS_ID = '3962'
-PERIOD_ID = 'p_114'
-USERNAME = '03326174'
-PASSWORD = '747698'
+CLASS_ID = '4180'
+PERIOD_ID = 'p_117'
+USERNAME = '0339434'
+PASSWORD = '181230'
 LAST_NAMES = {
     "685823428": "Клушин",
     "1977194410": "Дериглазова",

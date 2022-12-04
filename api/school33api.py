@@ -26,11 +26,12 @@ class Subject:
 
 
 class School33Api:   
-    def __init__(self):
+    def __init__(self, skip_update_marks=False):
         self.__session = self.__sign_in()
         self.__students = self.__get_students()
         self.__add_english_group()
-        self.__add_marks()
+        if not skip_update_marks:
+            self.__add_marks()
     
     @property
     def students(self):
@@ -83,13 +84,14 @@ class School33Api:
                     self.__students[i].subjects.append(sub)
                     marks_row = marks[i+COUNT_OF_STUDENTS].text.strip().split('\n')
                     for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5' or m == '+':
+                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
-            self.add_english_info_marks()
+        self.add_english_info_marks()
 
     def __add_english_group(self):
         students_en = []
-        cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='202', class_id=SUBJECTS_ENGLISH_1['class_id'])
+        cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='202', class_id=SUBJECTS_ENGLISH_1[0]['class_id'])
+        cookies['group_type_id'] = '10'
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
@@ -114,6 +116,7 @@ class School33Api:
 
         for subject in SUBJECTS_ENGLISH_2:
             cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+            cookies['group_type_id'] = '10'
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
@@ -125,11 +128,12 @@ class School33Api:
                     students_en_2[i].subjects.append(sub)
                     marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2].text.strip().split('\n')
                     for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5' or m == '+':
+                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
 
         for subject in SUBJECTS_ENGLISH_1:
             cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+            cookies['group_type_id'] = '10'
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
@@ -141,7 +145,7 @@ class School33Api:
                     students_en_1[i].subjects.append(sub)
                     marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1].text.strip().split('\n')
                     for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5' or m == '+':
+                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
 
         self.__students = sorted(students_en_1+students_en_2)

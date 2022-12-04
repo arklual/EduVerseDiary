@@ -9,7 +9,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
-api = School33Api()
+api = School33Api(skip_update_marks=True)
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     await message.answer(f'Привет, {message.from_user.first_name}. Ты уже прочитал описание и знаешь, чем я могу тебе помочь.\n' 
@@ -28,7 +28,7 @@ async def help_user(message: types.Message):
 
 @dp.message_handler(commands=['get_marks'])
 async def send_marks(message: types.Message):
-    last_name = LAST_NAMES[message.from_id]
+    last_name = LAST_NAMES[str(message.from_id)]
     await message.answer('Загружаем твои отметки, подождите (процесс может занять 1 минуту)')
     api.update_marks()
     for st in api.students:
