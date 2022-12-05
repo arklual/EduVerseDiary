@@ -8,6 +8,7 @@ class Student:
         self.id = id
         self.subjects = []
         self.english_group = 0
+        self.physical_edu_group = 0
 
     def __str__(self) -> str:
         return f'{self.name}'
@@ -104,6 +105,23 @@ class School33Api:
             for en in students_en:
                 if self.__students[i].id == en.id:
                     self.__students[i].english_group = 1
+    
+    def __add_physical_edu_group(self):
+        students_phys = []
+        cookies = self.__get_cookies(csrf='lCpU6QYoV8eqoobwOthwm6n6G8IjzFdBL3jEXSuVFip83aVi02gUxI5WgchUvbJC', subject_id='32', class_id=SUBJECTS_PHYS_EDU_1['class_id'])
+        cookies['group_type_id'] = '10'
+        headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
+        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False)
+        soup = BeautifulSoup(response.text)
+        user_rows = soup.find_all('div', {'id': 'user-rows'})
+        users = user_rows[1].find_all('div')
+        for user in users:
+            students_phys.append(Student(user.text.strip(), user.get('name')[1:]))
+        for i in range(len(self.__students)):
+            for ph in students_phys:
+                if self.__students[i].id == ph.id:
+                    self.__students[i].physical_edu_group = 1
 
     def add_english_info_marks(self):
         students_en_1 = []
@@ -149,6 +167,51 @@ class School33Api:
                             sub.marks.append(int(m))
 
         self.__students = sorted(students_en_1+students_en_2)
+
+    def add_physical_edu_marks(self):
+        students_ph_1 = []
+        students_ph_2 = []
+        for student in self.__students:
+            if student.physical_edu_group == 1:
+                students_ph_1.append(student)
+            elif student.physical_edu_group == 0:
+                students_ph_2.append(student)
+
+        subject = SUBJECTS_PHYS_EDU_2
+        cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+        cookies['group_type_id'] = '10'
+        headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
+        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False)
+        soup = BeautifulSoup(response.text)
+        marks = soup.find_all('div', {'class': 'mark-row'})
+        if(len(marks) > 5):
+            for i in range(len(students_ph_2)):
+                sub = Subject(marks[i].text.strip(), subject['name'])
+                students_ph_2[i].subjects.append(sub)
+                marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2].text.strip().split('\n')
+                for m in marks_row:
+                    if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                        sub.marks.append(int(m))
+
+        subject = SUBJECTS_ENGLISH_1
+        cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
+        cookies['group_type_id'] = '10'
+        headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
+        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False)
+        soup = BeautifulSoup(response.text)
+        marks = soup.find_all('div', {'class': 'mark-row'})
+        if(len(marks) > 5):
+            for i in range(len(students_ph_1)):
+                sub = Subject(marks[i].text.strip(), subject['name'])
+                students_ph_1[i].subjects.append(sub)
+                marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1].text.strip().split('\n')
+                for m in marks_row:
+                    if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                        sub.marks.append(int(m))
+
+        self.__students = sorted(students_ph_1+students_ph_1)
 
     def __get_cookies(self, csrf, subject_id, class_id = CLASS_ID):
         cookies = {

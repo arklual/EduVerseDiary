@@ -66,6 +66,17 @@ SUBJECTS_ENGLISH_2 = [
         'id': '31',
     },
 ]
+SUBJECTS_PHYS_EDU_1 = {
+        'name': 'Физкультура',
+        'class_id': '4451',
+        'id': '32',
+}
+
+SUBJECTS_PHYS_EDU_2 = {
+        'name': 'Физкультура',
+        'class_id': '4452',
+        'id': '32',
+}
 
 
 
@@ -105,3 +116,5 @@ LAST_NAMES = {
 COUNT_OF_STUDENTS = 26
 COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1 = 13
 COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2 = 13
+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1 = 6
+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2 = 20
