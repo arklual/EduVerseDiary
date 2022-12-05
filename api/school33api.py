@@ -31,6 +31,7 @@ class School33Api:
         self.__session = self.__sign_in()
         self.__students = self.__get_students()
         self.__add_english_group()
+        self.__add_physical_edu_group()
         if not skip_update_marks:
             self.__add_marks()
     
@@ -87,7 +88,8 @@ class School33Api:
                     for m in marks_row:
                         if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
-        self.add_english_info_marks()
+        self.__add_english_info_marks()
+        self.__add_physical_edu_marks()
 
     def __add_english_group(self):
         students_en = []
@@ -123,7 +125,7 @@ class School33Api:
                 if self.__students[i].id == ph.id:
                     self.__students[i].physical_edu_group = 1
 
-    def add_english_info_marks(self):
+    def __add_english_info_marks(self):
         students_en_1 = []
         students_en_2 = []
         for student in self.__students:
@@ -168,7 +170,7 @@ class School33Api:
 
         self.__students = sorted(students_en_1+students_en_2)
 
-    def add_physical_edu_marks(self):
+    def __add_physical_edu_marks(self):
         students_ph_1 = []
         students_ph_2 = []
         for student in self.__students:
@@ -194,7 +196,7 @@ class School33Api:
                     if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                         sub.marks.append(int(m))
 
-        subject = SUBJECTS_ENGLISH_1
+        subject = SUBJECTS_PHYS_EDU_1
         cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
         cookies['group_type_id'] = '10'
         headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
@@ -211,7 +213,7 @@ class School33Api:
                     if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                         sub.marks.append(int(m))
 
-        self.__students = sorted(students_ph_1+students_ph_1)
+        self.__students = sorted(students_ph_1+students_ph_2)
 
     def __get_cookies(self, csrf, subject_id, class_id = CLASS_ID):
         cookies = {

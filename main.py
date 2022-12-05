@@ -31,6 +31,7 @@ async def send_marks(message: types.Message):
     last_name = LAST_NAMES[str(message.from_id)]
     await message.answer('Загружаем твои отметки, подождите (процесс может занять 1 минуту)')
     api.update_marks()
+    print('hi')
     for st in api.students:
         if st.name.split(' ')[1] == last_name:
             await message.answer('Твои оценки:')
