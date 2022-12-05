@@ -142,7 +142,7 @@ class School33Api:
                                 headers=headers, cookies=cookies, verify=False)
             soup = BeautifulSoup(response.text)
             marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) > 5):
+            if(len(marks) >= len(students_en_2)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2):
                 for i in range(len(students_en_2)):
                     sub = Subject(marks[i].text.strip(), subject['name'])
                     students_en_2[i].subjects.append(sub)
@@ -159,7 +159,7 @@ class School33Api:
                                 headers=headers, cookies=cookies, verify=False)
             soup = BeautifulSoup(response.text)
             marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) > 5):
+            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
                 for i in range(len(students_en_1)):
                     sub = Subject(marks[i].text.strip(), subject['name'])
                     students_en_1[i].subjects.append(sub)
@@ -187,7 +187,7 @@ class School33Api:
                             headers=headers, cookies=cookies, verify=False)
         soup = BeautifulSoup(response.text)
         marks = soup.find_all('div', {'class': 'mark-row'})
-        if(len(marks) > 5):
+        if(len(marks) >= COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2+len(students_ph_2)):
             for i in range(len(students_ph_2)):
                 sub = Subject(marks[i].text.strip(), subject['name'])
                 students_ph_2[i].subjects.append(sub)
@@ -204,7 +204,7 @@ class School33Api:
                             headers=headers, cookies=cookies, verify=False)
         soup = BeautifulSoup(response.text)
         marks = soup.find_all('div', {'class': 'mark-row'})
-        if(len(marks) > 5):
+        if(len(marks) >= len(students_ph_1)+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1):
             for i in range(len(students_ph_1)):
                 sub = Subject(marks[i].text.strip(), subject['name'])
                 students_ph_1[i].subjects.append(sub)
