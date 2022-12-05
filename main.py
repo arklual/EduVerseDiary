@@ -36,7 +36,8 @@ async def send_marks(message: types.Message):
         if st.name.split(' ')[1] == last_name:
             await message.answer('Твои оценки:')
             for subject in st.subjects:
-                await message.answer(f'{subject.name} {subject.average_mark} {subject.marks}')
+                if subject.marks != []:
+                    await message.answer(f'{subject.name} {subject.average_mark} {subject.marks}')
 
     
 
