@@ -1,3 +1,5 @@
 beautifulsoup4
 aiogram
 requests
+apscheduler
+asyncio

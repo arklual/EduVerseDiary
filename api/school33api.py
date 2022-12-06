@@ -64,7 +64,8 @@ class School33Api:
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        print('Adding students')
         user_rows = soup.find_all('div', {'id': 'user-rows'})
         users = user_rows[1].find_all('div')
         for user in users:
@@ -78,7 +79,8 @@ class School33Api:
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
 
-            soup = BeautifulSoup(response.text)
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Parsing', subject['name'])
             marks = soup.find_all('div', {'class': 'mark-row'})
             if(len(marks) > COUNT_OF_STUDENTS):
                 for i in range(len(self.__students)):
@@ -98,7 +100,8 @@ class School33Api:
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        print('Adding english group')
         user_rows = soup.find_all('div', {'id': 'user-rows'})
         users = user_rows[1].find_all('div')
         for user in users:
@@ -115,7 +118,8 @@ class School33Api:
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        print('Adding physical education group')
         user_rows = soup.find_all('div', {'id': 'user-rows'})
         users = user_rows[1].find_all('div')
         for user in users:
@@ -140,7 +144,8 @@ class School33Api:
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
-            soup = BeautifulSoup(response.text)
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Parsing', subject['name'])
             marks = soup.find_all('div', {'class': 'mark-row'})
             if(len(marks) >= len(students_en_2)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2):
                 for i in range(len(students_en_2)):
@@ -157,7 +162,8 @@ class School33Api:
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
             response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                                 headers=headers, cookies=cookies, verify=False)
-            soup = BeautifulSoup(response.text)
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Parsing', subject['name'])
             marks = soup.find_all('div', {'class': 'mark-row'})
             if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
                 for i in range(len(students_en_1)):
@@ -185,7 +191,8 @@ class School33Api:
         headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        print('Parsing', subject['name'])
         marks = soup.find_all('div', {'class': 'mark-row'})
         if(len(marks) >= COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2+len(students_ph_2)):
             for i in range(len(students_ph_2)):
@@ -202,7 +209,8 @@ class School33Api:
         headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
         response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
                             headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        print('Parsing', subject['name'])
         marks = soup.find_all('div', {'class': 'mark-row'})
         if(len(marks) >= len(students_ph_1)+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1):
             for i in range(len(students_ph_1)):
