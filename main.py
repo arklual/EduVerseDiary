@@ -52,7 +52,7 @@ async def send_if_new_marks():
                 await bot.send_message('685823428', f'Новый оценки по предмету {api.students[7].subjects[j].name}:', api.students[7].subjects[j].marks[len(students[7].subjects[j].marks):len(api.students[7].subjects[j].marks)])
 
 async def scheduler():
-    aioschedule.every(2).minutes.do(send_if_new_marks)
+    aioschedule.every(10).minutes.do(send_if_new_marks)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
