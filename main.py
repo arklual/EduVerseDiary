@@ -46,6 +46,7 @@ async def send_if_new_marks():
     if students != api.students:
         for j in range(0, len(api.students[7].subjects)):
             if j >= len(students[7].subjects):
+                if api.students[7].subjects[j].marks == []: continue
                 await bot.send_message('685823428', f'Новый оценки по предмету {api.students[7].subjects[j].name}:', api.students[7].subjects[j].marks)
             elif len(api.students[7].subjects[j].marks) > len(students[7].subjects[j].marks):
                 await bot.send_message('685823428', f'Новый оценки по предмету {api.students[7].subjects[j].name}:', api.students[7].subjects[j].marks[len(students[7].subjects[j].marks):len(api.students[7].subjects[j].marks)])
