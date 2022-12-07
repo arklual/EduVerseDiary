@@ -81,6 +81,7 @@ SUBJECTS_PHYS_EDU_2 = {
 
 
 TELEGRAM_TOKEN = '5067489447:AAGP1UVmfaMX-4lxgi3EdVzBRTtFGq5j9Lo'
+#TELEGRAM_TOKEN = '5099099475:AAHNWwVNOoPR6oPELEntSy3UMlv8y2EZTTI'
 CLASS_ID = '4180'
 PERIOD_ID = 'p_118'
 USERNAME = '0339434'
@@ -92,7 +93,7 @@ LAST_NAMES = {
     "5041067839": "Крупчатников",
     "815945567": "Щукин",
     "504137898": "Вальков",
-    "1978487215": "Королёв",
+    "1978487215": "Королев",
     "760939474": "Арабачан",
     "951149225": "Лютый",
     "958897463": "Носов",
