@@ -42,6 +42,7 @@ class School33Api:
     def update_marks(self):
         for i in range(len(self.__students)):
             self.__students[i].subjects = []
+        self.__session = self.__sign_in()
         self.__add_marks()
 
     def __sign_in(self):
