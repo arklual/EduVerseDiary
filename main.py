@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule
 import asyncio
 import copy
-from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Process
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 storage = MemoryStorage()
@@ -57,13 +57,10 @@ async def scheduler():
         await aioschedule.run_pending()
         await asyncio.sleep(1)
 
-@asyncio.coroutine
-def starter():
-    executor = ProcessPoolExecutor()
-    out = yield from loop.run_in_executor(executor, scheduler) 
-    
+def starter(): return scheduler(); #idk how multiprocessing interacts with asyncio, so...
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(starter())
-    executor.start_polling(dp, on_startup=on_startup)
+    process_in_th = Process(target=starter)
+    process_in_th.start()
+    executor.start_polling(dp)
