@@ -8,6 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule
 import asyncio
 import copy
+from concurrent.futures import ProcessPoolExecutor
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 storage = MemoryStorage()
@@ -56,8 +57,13 @@ async def scheduler():
         await aioschedule.run_pending()
         await asyncio.sleep(1)
 
-async def on_startup(_):
-    asyncio.create_task(scheduler())
+@asyncio.coroutine
+def starter():
+    executor = ProcessPoolExecutor()
+    out = yield from loop.run_in_executor(executor, scheduler) 
+    
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(starter())
     executor.start_polling(dp, on_startup=on_startup)
