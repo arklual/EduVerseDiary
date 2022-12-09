@@ -133,11 +133,16 @@ class School33Api:
     def __add_english_info_marks(self):
         students_en_1 = []
         students_en_2 = []
+        petrov = ''
         for student in self.__students:
-            if student.english_group == 1:
+            if student.english_group == 1 and 'Петров' not in student.name:
                 students_en_1.append(student)
             elif student.english_group == 0:
                 students_en_2.append(student)
+            elif 'Петров' in student.name:
+                petrov = student
+        students_en_1.append(petrov)
+
 
         for subject in SUBJECTS_ENGLISH_2:
             cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
@@ -166,11 +171,11 @@ class School33Api:
             soup = BeautifulSoup(response.text, features='html.parser')
             print('Parsing', subject['name'])
             marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1-1):
+            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
                 for i in range(len(students_en_1)):
                     sub = Subject(marks[i].text.strip(), subject['name'])
                     students_en_1[i].subjects.append(sub)
-                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1-1].text.strip().split('\n')
+                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1].text.strip().split('\n')
                     for m in marks_row:
                         if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
@@ -180,11 +185,15 @@ class School33Api:
     def __add_physical_edu_marks(self):
         students_ph_1 = []
         students_ph_2 = []
+        petrov = ''
         for student in self.__students:
             if student.physical_edu_group == 1:
                 students_ph_1.append(student)
-            elif student.physical_edu_group == 0:
+            elif student.physical_edu_group == 0 and 'Петров' not in student.name:
                 students_ph_2.append(student)
+            elif 'Петров' in student.name:
+                petrov = student
+        students_ph_2.append(petrov)
 
         subject = SUBJECTS_PHYS_EDU_2
         cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
