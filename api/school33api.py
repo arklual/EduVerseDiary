@@ -166,11 +166,11 @@ class School33Api:
             soup = BeautifulSoup(response.text, features='html.parser')
             print('Parsing', subject['name'])
             marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
+            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1-1):
                 for i in range(len(students_en_1)):
                     sub = Subject(marks[i].text.strip(), subject['name'])
                     students_en_1[i].subjects.append(sub)
-                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1].text.strip().split('\n')
+                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1-1].text.strip().split('\n')
                     for m in marks_row:
                         if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
                             sub.marks.append(int(m))
