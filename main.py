@@ -42,13 +42,19 @@ async def send_marks(message: types.Message):
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
     api.update_marks()
-    if students != api.students:
-        for j in range(0, len(api.students[7].subjects)):
-            if j >= len(students[7].subjects):
-                if api.students[7].subjects[j].marks == []: continue
-                await bot.send_message('685823428', f'Новый оценки по предмету {api.students[7].subjects[j].name}:', api.students[7].subjects[j].marks)
-            elif len(api.students[7].subjects[j].marks) > len(students[7].subjects[j].marks):
-                await bot.send_message('685823428', f'Новый оценки по предмету {api.students[7].subjects[j].name}:', api.students[7].subjects[j].marks[len(students[7].subjects[j].marks):len(api.students[7].subjects[j].marks)])
+    for i in range(len(api.students)):
+        if students[i].subjects != api.students[i].subjects:
+            last_name = students[i].name.split(' ')[1]
+            id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
+            for j in range(len(students[i].subjects), len(api.students[i].subjects)):
+                if api.students[i].subjects[j].marks != []:
+                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks}")
+        for j in range(len(students[i].subjects)):
+            if students[i].subjects[j].marks != api.students[i].subjects[j].marks:
+                last_name = students[i].name.split(' ')[1]
+                id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
+                for k in range(len(students[i].subjects[j].marks), len(api.students[i].subjects[j].marks)):
+                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
 
 async def scheduler():
     aioschedule.every(10).minutes.do(send_if_new_marks)
