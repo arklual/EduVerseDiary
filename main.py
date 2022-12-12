@@ -4,14 +4,13 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.utils.markdown import hbold, hunderline
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule
 import asyncio
 import copy
+from aiogram.utils.exceptions import ChatNotFound
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
-storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
+dp = Dispatcher(bot)
 api = School33Api()
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
@@ -48,13 +47,20 @@ async def send_if_new_marks():
             id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
             for j in range(len(students[i].subjects), len(api.students[i].subjects)):
                 if api.students[i].subjects[j].marks != []:
-                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks}")
+                    try:
+                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks}")
+                    except ChatNotFound:
+                        print(f"Can't send to {id} {last_name}")
+                        break
         for j in range(len(students[i].subjects)):
             if students[i].subjects[j].marks != api.students[i].subjects[j].marks:
                 last_name = students[i].name.split(' ')[1]
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
                 for k in range(len(students[i].subjects[j].marks), len(api.students[i].subjects[j].marks)):
-                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
+                    try:
+                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
+                    except ChatNotFound:
+                        print(f"Can't send to {id} {last_name}")    
                     break
 
 async def scheduler():
