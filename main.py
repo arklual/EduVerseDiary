@@ -55,6 +55,7 @@ async def send_if_new_marks():
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
                 for k in range(len(students[i].subjects[j].marks), len(api.students[i].subjects[j].marks)):
                     await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
+                    break
 
 async def scheduler():
     aioschedule.every(10).minutes.do(send_if_new_marks)
