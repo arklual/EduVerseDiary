@@ -56,11 +56,10 @@ async def send_if_new_marks():
             if students[i].subjects[j].marks != api.students[i].subjects[j].marks:
                 last_name = students[i].name.split(' ')[1]
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
-                for k in range(len(students[i].subjects[j].marks), len(api.students[i].subjects[j].marks)):
-                    try:
-                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
-                    except ChatNotFound:
-                        print(f"Can't send to {id} {last_name}")    
+                try:
+                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
+                except ChatNotFound:
+                    print(f"Can't send to {id} {last_name}")
                     break
 
 async def scheduler():
