@@ -1,6 +1,8 @@
 from api.settings import *
 import requests
 from bs4 import BeautifulSoup
+import time
+import copy
 
 class Student:
     def __init__(self, name, id):
@@ -40,10 +42,15 @@ class School33Api:
         return self.__students
 
     def update_marks(self):
-        for i in range(len(self.__students)):
-            self.__students[i].subjects = []
-        self.__session = self.__sign_in()
-        self.__add_marks()
+        s = copy.deepcopy(self.__students)
+        try:
+            for i in range(len(self.__students)):
+                self.__students[i].subjects = []
+            self.__session = self.__sign_in()
+            self.__add_marks()
+        except:
+            print('Oops, something goes wrong...')
+            self.__students = s
 
     def __sign_in(self):
         cookies = self.__get_cookies(csrf='FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM', subject_id='272')

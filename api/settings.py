@@ -77,7 +77,7 @@ SUBJECTS_PHYS_EDU_2 = {
         'class_id': '4452',
         'id': '32',
 }
-DEBUG = True
+DEBUG = False
 TELEGRAM_TOKEN = ''
 if DEBUG:
     TELEGRAM_TOKEN = '5719666199:AAFmsqG46O4zzfsR-scdtBB-NHgo2v8W6qI'
