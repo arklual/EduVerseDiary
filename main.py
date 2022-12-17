@@ -7,6 +7,7 @@ from aiogram.utils.markdown import hbold, hunderline
 import aioschedule
 import asyncio
 import copy
+from collections import Counter
 import datetime
 from aiogram.utils.exceptions import ChatNotFound
 
@@ -68,7 +69,8 @@ async def send_if_new_marks():
                 last_name = students[i].name.split(' ')[1]
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
                 try:
-                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks[len(students[i].subjects[j].marks):len(api.students[i].subjects[j].marks)]}")
+                    res = list((Counter(api.students[i].subjects[j].marks) - Counter(students[i].subjects[j].marks)).elements())
+                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {res}")
                 except ChatNotFound:
                     print(f"Can't send to {id} {last_name}")
                     break
