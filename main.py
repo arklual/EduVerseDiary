@@ -10,6 +10,7 @@ import copy
 from collections import Counter
 import datetime
 from aiogram.utils.exceptions import ChatNotFound
+import homeworks
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
@@ -21,7 +22,8 @@ async def process_start_command(message: types.Message):
     "📍 " + hbold(' Что я могу?') + '\n'
     + '🚩 Присылать твои оценки в данном триместре по запросу (но актуальные, в отличие от официального дневника)' + '\n' +
     '🚩 Присылать тебе новые оценки в тот момент, когда ты их получаешь.\n' + 
-    '🚩 Отправлять тебе расписание звонков на текущий день.\n' + 
+    '🚩 Присылать тебе домашнее задание на следующий день.\n' + 
+    '🚩 Отправлять тебе расписание звонков на текущий день.\n\n' + 
     'С помощью меня ты сможешь понять, что у тебя получается лучше,  а что хуже.\n\n'
     '🆘\nСправка: /help', parse_mode='HTML'
     )
@@ -30,7 +32,8 @@ async def process_start_command(message: types.Message):
 async def help_user(message: types.Message):
     await message.answer("""Вот команды, которые доступны нашему боту.
     /get_marks - узнать о твоих текущих оценках в этом триместре
-    /get_schedule - узнать расписание звонков на текущий день""")
+    /get_schedule - узнать расписание звонков на текущий день
+    /get_homework - узнать домашнее задание на следующий день""")
 
 @dp.message_handler(commands=['get_marks'])
 async def send_marks(message: types.Message):
@@ -50,6 +53,16 @@ async def send_schedule(message: types.Message):
     else:
         await message.answer("1. 8.30-9.15\n2. 9.25-10.10\n3. 10.25-11.10\n4. 11.25-12.10\n5. 12.25-13.10\n6. 13.20-14.05\n7. 14.15-14.55")
 
+@dp.message_handler(commands=['get_homework'])
+async def send_homework(message: types.Message):
+    if datetime.date.today().isoweekday() == 6:
+        await message.answer("""Домашнее задание на понедельник:""")
+    else:
+        await message.answer("""Домашнее задание на завтра:""")
+    hws = await homeworks.get_homework()
+    for hw in hws:
+        await message.answer(hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'])
+    
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
     api.update_marks()

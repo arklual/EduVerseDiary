@@ -30,7 +30,6 @@ async def get_homework():
 
 
 async def map_notion_result_to_homework(result):
-    homework_id = result['id']
     properties = result['properties']
     subject = properties['Предмет']['multi_select'][0]['name']
     task = properties['Задание']['title'][0]['text']['content']
