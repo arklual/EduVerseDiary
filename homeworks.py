@@ -17,7 +17,7 @@ async def get_homework():
             result_dict = await r.json()
             homework_list_result = result_dict['results']
             tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-            if tomorrow.weekday() == 6:
+            if tomorrow.isoweekday() == 7:
                 tomorrow += datetime.timedelta(days=1)
             homeworks = []
 
