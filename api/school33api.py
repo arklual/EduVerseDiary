@@ -1,5 +1,5 @@
 from api.settings import *
-import requests
+import aiohttp
 from bs4 import BeautifulSoup
 import time
 import copy
@@ -29,13 +29,15 @@ class Subject:
 
 
 class School33Api:   
-    def __init__(self, skip_update_marks=False):
-        self.__session = self.__sign_in()
-        self.__students = self.__get_students()
-        self.__add_english_group()
-        self.__add_physical_edu_group()
-        if not skip_update_marks:
-            self.__add_marks()
+    async def __init__(self, skip_update_marks=False):
+        async with aiohttp.ClientSession() as session:
+            await self.__sign_in(session)
+            self.__session = session
+            self.__students = await self.__get_students()
+            await self.__add_english_group()
+            await self.__add_physical_edu_group()
+            if not skip_update_marks:
+                await self.__add_marks()
     
     @property
     def students(self):
@@ -43,16 +45,16 @@ class School33Api:
 
     def update_marks(self):
         s = copy.deepcopy(self.__students)
+        for i in range(len(self.__students)):
+            self.__students[i].subjects = []
         try:
-            for i in range(len(self.__students)):
-                self.__students[i].subjects = []
             self.__session = self.__sign_in()
             self.__add_marks()
         except:
             print('Oops, something goes wrong...')
             self.__students = s
 
-    def __sign_in(self):
+    async def __sign_in(self, session):
         cookies = self.__get_cookies(csrf='FWMzTtfR8HLWYpVPocTgTZabxfztyUoanUrKdk6yBuGy85YKuvJ0SyYAbLzP2lLM', subject_id='272')
         data = {
             'csrfmiddlewaretoken': 'W2IsoDfkAYxbL5NgnoBwLYDHgaR86JqhE0nDIu613LsNVLQbtHrgKxr6UGRuAaNT',
@@ -62,82 +64,81 @@ class School33Api:
             'submit': '\u0412\u043E\u0439\u0442\u0438',
         }
         headers = self.__get_headers('http://93.181.225.54/accounts/login/?next=/')
-        ses = requests.session()
-        ses.post('http://93.181.225.54/accounts/login/', headers=headers,cookies=cookies, data=data, verify=False)
-        return ses
+        async with session.post('http://93.181.225.54/accounts/login/', headers=headers,cookies=cookies, data=data, verify=False) as r:
+            print('Sign in')
 
-    def __get_students(self):
+    async def __get_students(self):
         students = []
         cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='3')
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
-        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                            headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text, features='html.parser')
-        print('Adding students')
-        user_rows = soup.find_all('div', {'id': 'user-rows'})
-        users = user_rows[1].find_all('div')
-        for user in users:
-            students.append(Student(user.text.strip(), user.get('name')[1:]))
-        return students
+        async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False) as response:
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Adding students')
+            user_rows = soup.find_all('div', {'id': 'user-rows'})
+            users = user_rows[1].find_all('div')
+            for user in users:
+                students.append(Student(user.text.strip(), user.get('name')[1:]))
+            return students
 
-    def __add_marks(self):
+    async def __add_marks(self):
         for subject in SUBJECTS:
             cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id=subject['id'])
             headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
-            response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                                headers=headers, cookies=cookies, verify=False)
+            async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                                headers=headers, cookies=cookies, verify=False) as response:
 
-            soup = BeautifulSoup(response.text, features='html.parser')
-            print('Parsing', subject['name'])
-            marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) > COUNT_OF_STUDENTS):
-                for i in range(len(self.__students)):
-                    sub = Subject(marks[i].text.strip(), subject['name'])
-                    self.__students[i].subjects.append(sub)
-                    marks_row = marks[i+COUNT_OF_STUDENTS].text.strip().split('\n')
-                    for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
-                            sub.marks.append(int(m))
-        self.__add_english_info_marks()
-        self.__add_physical_edu_marks()
+                soup = BeautifulSoup(response.text, features='html.parser')
+                print('Parsing', subject['name'])
+                marks = soup.find_all('div', {'class': 'mark-row'})
+                if(len(marks) > COUNT_OF_STUDENTS):
+                    for i in range(len(self.__students)):
+                        sub = Subject(marks[i].text.strip(), subject['name'])
+                        self.__students[i].subjects.append(sub)
+                        marks_row = marks[i+COUNT_OF_STUDENTS].text.strip().split('\n')
+                        for m in marks_row:
+                            if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                                sub.marks.append(int(m))
+        await self.__add_english_info_marks()
+        await self.__add_physical_edu_marks()
 
-    def __add_english_group(self):
+    async def __add_english_group(self):
         students_en = []
         cookies = self.__get_cookies(csrf='yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', subject_id='202', class_id=SUBJECTS_ENGLISH_1[0]['class_id'])
         cookies['group_type_id'] = '10'
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
-        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                            headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text, features='html.parser')
-        print('Adding english group')
-        user_rows = soup.find_all('div', {'id': 'user-rows'})
-        users = user_rows[1].find_all('div')
-        for user in users:
-            students_en.append(Student(user.text.strip(), user.get('name')[1:]))
-        for i in range(len(self.__students)):
-            for en in students_en:
-                if self.__students[i].id == en.id:
-                    self.__students[i].english_group = 1
+        async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False) as response:
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Adding english group')
+            user_rows = soup.find_all('div', {'id': 'user-rows'})
+            users = user_rows[1].find_all('div')
+            for user in users:
+                students_en.append(Student(user.text.strip(), user.get('name')[1:]))
+            for i in range(len(self.__students)):
+                for en in students_en:
+                    if self.__students[i].id == en.id:
+                        self.__students[i].english_group = 1
     
-    def __add_physical_edu_group(self):
+    async def __add_physical_edu_group(self):
         students_phys = []
         cookies = self.__get_cookies(csrf='lCpU6QYoV8eqoobwOthwm6n6G8IjzFdBL3jEXSuVFip83aVi02gUxI5WgchUvbJC', subject_id='32', class_id=SUBJECTS_PHYS_EDU_1['class_id'])
         cookies['group_type_id'] = '10'
         headers = self.__get_headers('http://93.181.225.54/educ_proc/ep_marks/')
-        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                            headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text, features='html.parser')
-        print('Adding physical education group')
-        user_rows = soup.find_all('div', {'id': 'user-rows'})
-        users = user_rows[1].find_all('div')
-        for user in users:
-            students_phys.append(Student(user.text.strip(), user.get('name')[1:]))
-        for i in range(len(self.__students)):
-            for ph in students_phys:
-                if self.__students[i].id == ph.id:
-                    self.__students[i].physical_edu_group = 1
+        async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False) as response:
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Adding physical education group')
+            user_rows = soup.find_all('div', {'id': 'user-rows'})
+            users = user_rows[1].find_all('div')
+            for user in users:
+                students_phys.append(Student(user.text.strip(), user.get('name')[1:]))
+            for i in range(len(self.__students)):
+                for ph in students_phys:
+                    if self.__students[i].id == ph.id:
+                        self.__students[i].physical_edu_group = 1
 
-    def __add_english_info_marks(self):
+    async def __add_english_info_marks(self):
         students_en_1 = []
         students_en_2 = []
         petrov = ''
@@ -155,41 +156,41 @@ class School33Api:
             cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
             cookies['group_type_id'] = '10'
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
-            response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                                headers=headers, cookies=cookies, verify=False)
-            soup = BeautifulSoup(response.text, features='html.parser')
-            print('Parsing', subject['name'])
-            marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) >= len(students_en_2)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2):
-                for i in range(len(students_en_2)):
-                    sub = Subject(marks[i].text.strip(), subject['name'])
-                    students_en_2[i].subjects.append(sub)
-                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2].text.strip().split('\n')
-                    for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
-                            sub.marks.append(int(m))
+            async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                                headers=headers, cookies=cookies, verify=False) as response:
+                soup = BeautifulSoup(response.text, features='html.parser')
+                print('Parsing', subject['name'])
+                marks = soup.find_all('div', {'class': 'mark-row'})
+                if(len(marks) >= len(students_en_2)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2):
+                    for i in range(len(students_en_2)):
+                        sub = Subject(marks[i].text.strip(), subject['name'])
+                        students_en_2[i].subjects.append(sub)
+                        marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2].text.strip().split('\n')
+                        for m in marks_row:
+                            if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                                sub.marks.append(int(m))
 
         for subject in SUBJECTS_ENGLISH_1:
             cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
             cookies['group_type_id'] = '10'
             headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
-            response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                                headers=headers, cookies=cookies, verify=False)
-            soup = BeautifulSoup(response.text, features='html.parser')
-            print('Parsing', subject['name'])
-            marks = soup.find_all('div', {'class': 'mark-row'})
-            if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
-                for i in range(len(students_en_1)):
-                    sub = Subject(marks[i].text.strip(), subject['name'])
-                    students_en_1[i].subjects.append(sub)
-                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1].text.strip().split('\n')
-                    for m in marks_row:
-                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
-                            sub.marks.append(int(m))
+            async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                                headers=headers, cookies=cookies, verify=False) as response:
+                soup = BeautifulSoup(response.text, features='html.parser')
+                print('Parsing', subject['name'])
+                marks = soup.find_all('div', {'class': 'mark-row'})
+                if(len(marks) >= len(students_en_1)+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1):
+                    for i in range(len(students_en_1)):
+                        sub = Subject(marks[i].text.strip(), subject['name'])
+                        students_en_1[i].subjects.append(sub)
+                        marks_row = marks[i+COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1].text.strip().split('\n')
+                        for m in marks_row:
+                            if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                                sub.marks.append(int(m))
 
         self.__students = sorted(students_en_1+students_en_2)
 
-    def __add_physical_edu_marks(self):
+    async def __add_physical_edu_marks(self):
         students_ph_1 = []
         students_ph_2 = []
         petrov = ''
@@ -206,37 +207,37 @@ class School33Api:
         cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
         cookies['group_type_id'] = '10'
         headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
-        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                            headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text, features='html.parser')
-        print('Parsing', subject['name'])
-        marks = soup.find_all('div', {'class': 'mark-row'})
-        if(len(marks) >= COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2+len(students_ph_2)):
-            for i in range(len(students_ph_2)):
-                sub = Subject(marks[i].text.strip(), subject['name'])
-                students_ph_2[i].subjects.append(sub)
-                marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2].text.strip().split('\n')
-                for m in marks_row:
-                    if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
-                        sub.marks.append(int(m))
+        async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False) as response:
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Parsing', subject['name'])
+            marks = soup.find_all('div', {'class': 'mark-row'})
+            if(len(marks) >= COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2+len(students_ph_2)):
+                for i in range(len(students_ph_2)):
+                    sub = Subject(marks[i].text.strip(), subject['name'])
+                    students_ph_2[i].subjects.append(sub)
+                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_2].text.strip().split('\n')
+                    for m in marks_row:
+                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                            sub.marks.append(int(m))
 
         subject = SUBJECTS_PHYS_EDU_1
         cookies = self.__get_cookies(csrf = 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj', class_id=subject["class_id"], subject_id=subject["id"])
         cookies['group_type_id'] = '10'
         headers = self.__get_headers(referer='http://93.181.225.54/educ_proc/ep_marks/')
-        response = self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
-                            headers=headers, cookies=cookies, verify=False)
-        soup = BeautifulSoup(response.text, features='html.parser')
-        print('Parsing', subject['name'])
-        marks = soup.find_all('div', {'class': 'mark-row'})
-        if(len(marks) >= len(students_ph_1)+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1):
-            for i in range(len(students_ph_1)):
-                sub = Subject(marks[i].text.strip(), subject['name'])
-                students_ph_1[i].subjects.append(sub)
-                marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1].text.strip().split('\n')
-                for m in marks_row:
-                    if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
-                        sub.marks.append(int(m))
+        async with self.__session.get('http://93.181.225.54/educ_proc/ep_marks/',
+                            headers=headers, cookies=cookies, verify=False) as response:
+            soup = BeautifulSoup(response.text, features='html.parser')
+            print('Parsing', subject['name'])
+            marks = soup.find_all('div', {'class': 'mark-row'})
+            if(len(marks) >= len(students_ph_1)+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1):
+                for i in range(len(students_ph_1)):
+                    sub = Subject(marks[i].text.strip(), subject['name'])
+                    students_ph_1[i].subjects.append(sub)
+                    marks_row = marks[i+COUNT_OF_STUDENTS_IN_PHYS_EDU_GROUP_1].text.strip().split('\n')
+                    for m in marks_row:
+                        if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
+                            sub.marks.append(int(m))
 
         self.__students = sorted(students_ph_1+students_ph_2)
 
