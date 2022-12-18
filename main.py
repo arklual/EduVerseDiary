@@ -65,7 +65,7 @@ async def send_homework(message: types.Message):
     
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
-    api.update_marks()
+    await api.update_marks()
     for i in range(len(api.students)):
         if students[i].subjects != api.students[i].subjects:
             last_name = students[i].name.split(' ')[1]

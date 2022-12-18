@@ -43,13 +43,15 @@ class School33Api:
     def students(self):
         return self.__students
 
-    def update_marks(self):
+    async def update_marks(self):
         s = copy.deepcopy(self.__students)
         for i in range(len(self.__students)):
             self.__students[i].subjects = []
         try:
-            self.__session = self.__sign_in()
-            self.__add_marks()
+            async with aiohttp.ClientSession() as session:
+                await self.__sign_in(session)
+                self.__session = session
+                await self.__add_marks()
         except:
             print('Oops, something goes wrong...')
             self.__students = s
