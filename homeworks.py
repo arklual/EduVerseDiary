@@ -34,9 +34,11 @@ async def map_notion_result_to_homework(result):
     subject = properties['Предмет']['multi_select'][0]['name']
     task = properties['Задание']['title'][0]['text']['content']
     deadline = properties['Deadline']['date']['start']
+    files = result['properties']['Приложения']['files']
     return {
         'subject': subject,
         'task': task,
-        'deadline': deadline
+        'deadline': deadline,
+        'files': files
     }
 

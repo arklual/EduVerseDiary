@@ -17,7 +17,7 @@ dp = Dispatcher(bot)
 api = School33Api()
 
 def get_keyboard():
-    keyboard = types.ReplyKeyboardMarkup()
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_1 = types.KeyboardButton(text="Оценки")
     keyboard.add(button_1)
     button_2 = "Домашнее задание"
@@ -73,6 +73,11 @@ async def send_homework(message: types.Message):
     hws = await homeworks.get_homework()
     for hw in hws:
         await message.answer(hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
+        for file in hw['files']:
+            if file['name'][-4:] == '.jpg':
+                await message.answer_photo(photo=file['file']['url'], )
+            else:
+                await message.answer_document(document=file['file']['url'])
     
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
