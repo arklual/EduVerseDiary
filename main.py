@@ -26,6 +26,18 @@ def get_keyboard():
     keyboard.add(button_3)
     return keyboard
 
+def prettify_marks(marks):
+    marks = str(marks)
+    marks = marks.replace('[', '')
+    marks = marks.replace(']', '')
+    marks = marks.replace('5', '5️⃣')
+    marks = marks.replace('4', '4️⃣')
+    marks = marks.replace('3', '3️⃣')
+    marks = marks.replace('2', '2️⃣')
+    marks = marks.replace('1', '1️⃣')
+    marks = marks.replace(', ', '')
+    return marks
+
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     await message.answer(f'Привет, {message.from_user.first_name}. Ты уже прочитал описание и знаешь, чем я могу тебе помочь.\n' 
@@ -54,7 +66,8 @@ async def send_marks(message: types.Message):
             await message.answer('Твои оценки:')
             for subject in st.subjects:
                 if subject.marks != []:
-                    await message.answer(f'{subject.name} {subject.average_mark} {subject.marks}', reply_markup=get_keyboard())
+                    marks = prettify_marks(subject.marks)
+                    await message.answer(f'{subject.name} {subject.average_mark} {marks}', reply_markup=get_keyboard())
 
 @dp.message_handler(lambda message: message.text == "Расписание звонков" or message.text == "/get_schedule")
 async def send_schedule(message: types.Message):
@@ -89,7 +102,7 @@ async def send_if_new_marks():
             for j in range(len(students[i].subjects), len(api.students[i].subjects)):
                 if api.students[i].subjects[j].marks != []:
                     try:
-                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {api.students[i].subjects[j].marks}")
+                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(api.students[i].subjects[j].marks)}")
                     except ChatNotFound:
                         print(f"Can't send to {id} {last_name}")
                         break
@@ -99,7 +112,7 @@ async def send_if_new_marks():
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
                 try:
                     res = list((Counter(api.students[i].subjects[j].marks) - Counter(students[i].subjects[j].marks)).elements())
-                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {res}")
+                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(res)}")
                 except ChatNotFound:
                     print(f"Can't send to {id} {last_name}")
                     break
