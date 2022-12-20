@@ -79,19 +79,32 @@ async def send_schedule(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
 async def send_homework(message: types.Message):
+    inline_btn_1 = types.InlineKeyboardButton('Сегодня', callback_data='btn1')
+    inline_btn_2 = types.InlineKeyboardButton('Завтра', callback_data='btn2') 
     if datetime.date.today().isoweekday() == 6:
-        await message.answer("""Домашнее задание на понедельник:""")
-    else:
-        await message.answer("""Домашнее задание на завтра:""")
-    hws = await homeworks.get_homework()
+        inline_btn_2 = types.InlineKeyboardButton('Понедельник')
+    inline_kb1 = types.InlineKeyboardMarkup().add(inline_btn_1, inline_btn_2)
+    await message.answer("На какой день Вы хотите получить д/з?", reply_markup=inline_kb1)
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('btn'))
+async def process_callback_homework(callback_query: types.CallbackQuery):
+    code = callback_query.data[-1]
+    if code.isdigit():
+        code = int(code)
+    id = callback_query.from_user.id
+    if code == 1:
+        hws = await homeworks.get_homework(date=datetime.date.today())
+    if code == 2:
+        hws = await homeworks.get_homework()
     for hw in hws:
-        await message.answer(hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
+        await bot.send_message(id, hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
         for file in hw['files']:
             if file['name'][-4:] == '.jpg':
-                await message.answer_photo(photo=file['file']['url'], )
+                
+                await bot.send_photo(id, photo=file['file']['url'], )
             else:
-                await message.answer_document(document=file['file']['url'])
-    
+                await bot.send_document(id, document=file['file']['url'])
+
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
     api.update_marks()

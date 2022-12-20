@@ -6,7 +6,7 @@ token = 'secret_TObnT0Zb9Qb55PHwIdymijzdmNrFJCZnal3hwYYBuoc'
 database_id = '8b2cb4fdac3044f09ae3187392132482'
 
 
-async def get_homework():
+async def get_homework(date=datetime.date.today() + datetime.timedelta(days=1)):
     url = f'https://api.notion.com/v1/databases/{database_id}/query'
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers={
@@ -16,14 +16,13 @@ async def get_homework():
 
             result_dict = await r.json()
             homework_list_result = result_dict['results']
-            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-            if tomorrow.isoweekday() == 7:
-                tomorrow += datetime.timedelta(days=1)
+            if date.isoweekday() == 7:
+                date += datetime.timedelta(days=1)
             homeworks = []
 
             for homework in homework_list_result:
                 movie_dict = await map_notion_result_to_homework(homework)
-                if movie_dict['deadline'] == str(tomorrow):
+                if movie_dict['deadline'] == str(date):
                     homeworks.append(movie_dict)
 
             return homeworks
