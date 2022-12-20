@@ -74,7 +74,7 @@ async def send_schedule(message: types.Message):
     await message.answer("""Расписание звонков сегодня:""")
     if datetime.date.today().isoweekday() == 1 or datetime.date.today().isoweekday() == 6:
         await message.answer("1. 8.00-8.40\n2. 8.45-9.25\n3. 9.35-10.15\n4. 10.30-11.10\n5. 11.25-12.05\n6. 12.20-13.00\n7. 13.10-13.50", reply_markup=get_keyboard())
-    else:
+    elif datetime.date.today().isoweekday() != 7:
         await message.answer("1. 8.30-9.15\n2. 9.25-10.10\n3. 10.25-11.10\n4. 11.25-12.10\n5. 12.25-13.10\n6. 13.20-14.05\n7. 14.15-14.55", reply_markup=get_keyboard())
 
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
