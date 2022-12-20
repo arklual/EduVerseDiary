@@ -112,7 +112,8 @@ async def send_if_new_marks():
                 id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
                 try:
                     res = list((Counter(api.students[i].subjects[j].marks) - Counter(students[i].subjects[j].marks)).elements())
-                    await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(res)}")
+                    if res != []:
+                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(res)}")
                 except ChatNotFound:
                     print(f"Can't send to {id} {last_name}")
                     break
