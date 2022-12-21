@@ -80,7 +80,6 @@ async def send_schedule(message: types.Message):
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
 async def send_homework(message: types.Message):
     isoweekday = datetime.date.today().isoweekday()
-    isoweekday = 6
     buttons = []
     if isoweekday != 7:
         buttons.append(types.InlineKeyboardButton('Сегодня', callback_data=f'btn{isoweekday}'))
