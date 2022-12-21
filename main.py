@@ -14,7 +14,7 @@ import homeworks
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
-api = School33Api(skip_update_marks=True)
+api = School33Api(skip_update_marks=False)
 
 def get_keyboard():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
