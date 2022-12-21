@@ -1,4 +1,4 @@
-from api.settings import TELEGRAM_TOKEN, LAST_NAMES
+from api.settings import TELEGRAM_TOKEN, LAST_NAMES, WEEK_DAYS
 from api.school33api import School33Api
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -14,7 +14,7 @@ import homeworks
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
-api = School33Api()
+api = School33Api(skip_update_marks=True)
 
 def get_keyboard():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -79,11 +79,18 @@ async def send_schedule(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
 async def send_homework(message: types.Message):
-    inline_btn_1 = types.InlineKeyboardButton('Сегодня', callback_data='btn1')
-    inline_btn_2 = types.InlineKeyboardButton('Завтра', callback_data='btn2') 
-    if datetime.date.today().isoweekday() == 6:
-        inline_btn_2 = types.InlineKeyboardButton('Понедельник')
-    inline_kb1 = types.InlineKeyboardMarkup().add(inline_btn_1, inline_btn_2)
+    isoweekday = datetime.date.today().isoweekday()
+    isoweekday = 6
+    buttons = []
+    if isoweekday != 7:
+        buttons.append(types.InlineKeyboardButton('Сегодня', callback_data=f'btn{isoweekday}'))
+    if isoweekday == 6 or isoweekday == 7:
+        for i in range(1, 7):
+            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'btn{i}'))
+    else:
+        for i in range(isoweekday+1, 7):
+            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'btn{i}'))
+    inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=inline_kb1)
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('btn'))
@@ -92,10 +99,19 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
     if code.isdigit():
         code = int(code)
     id = callback_query.from_user.id
-    if code == 1:
+    isoweekday = datetime.date.today().isoweekday()
+    await bot.answer_callback_query(callback_query.id)
+    hws = []
+    if code == isoweekday:
         hws = await homeworks.get_homework(date=datetime.date.today())
-    if code == 2:
-        hws = await homeworks.get_homework(date=datetime.date.today() + datetime.timedelta(days=1))
+    else:
+        date = datetime.date.today() + datetime.timedelta(days=1)
+        while date.isoweekday() != code:
+            date += datetime.timedelta(days=1)
+        hws = await homeworks.get_homework(date)
+    await bot.send_message(id, 'Домашнее задание: '+WEEK_DAYS[date.isoweekday()], reply_markup=get_keyboard())
+    if hws == []:
+        await bot.send_message(id, 'Домашнего задания на этот день ещё нет.', reply_markup=get_keyboard())
     for hw in hws:
         await bot.send_message(id, hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
         for file in hw['files']:

@@ -115,6 +115,17 @@ LAST_NAMES = {
     "1703301059": "Мартемьянов",
     "1874743393": "Петров",
 }
+
+WEEK_DAYS = {
+    1: 'Понедельник',
+    2: 'Вторник',
+    3: 'Среда',
+    4: 'Четверг',
+    5: 'Пятница',
+    6: 'Суббота',
+    7: 'Воскресенье',
+}
+
 COUNT_OF_STUDENTS = 26
 COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_1 = 13
 COUNT_OF_STUDENTS_IN_ENGLISH_GROUP_2 = 13
