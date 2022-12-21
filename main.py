@@ -101,8 +101,9 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
     isoweekday = datetime.date.today().isoweekday()
     await bot.answer_callback_query(callback_query.id)
     hws = []
+    date = datetime.date.today()
     if code == isoweekday:
-        hws = await homeworks.get_homework(date=datetime.date.today())
+        hws = await homeworks.get_homework(datetime.date.today())
     else:
         date = datetime.date.today() + datetime.timedelta(days=1)
         while date.isoweekday() != code:
