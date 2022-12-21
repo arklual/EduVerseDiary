@@ -95,7 +95,7 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
     if code == 1:
         hws = await homeworks.get_homework(date=datetime.date.today())
     if code == 2:
-        hws = await homeworks.get_homework()
+        hws = await homeworks.get_homework(date=datetime.date.today() + datetime.timedelta(days=1))
     for hw in hws:
         await bot.send_message(id, hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
         for file in hw['files']:
