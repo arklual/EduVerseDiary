@@ -11,6 +11,7 @@ from collections import Counter
 import datetime
 from aiogram.utils.exceptions import ChatNotFound
 import homeworks
+from notes import get_notes
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
@@ -24,6 +25,8 @@ def get_keyboard():
     keyboard.add(button_2)
     button_3 = "Расписание звонков"
     keyboard.add(button_3)
+    button_4 = "Конспекты"
+    keyboard.add(button_4)
     return keyboard
 
 def prettify_marks(marks):
@@ -77,22 +80,55 @@ async def send_schedule(message: types.Message):
     elif datetime.date.today().isoweekday() != 7:
         await message.answer("1. 8.30-9.15\n2. 9.25-10.10\n3. 10.25-11.10\n4. 11.25-12.10\n5. 12.25-13.10\n6. 13.20-14.05\n7. 14.15-14.55", reply_markup=get_keyboard())
 
+@dp.message_handler(lambda message: message.text == "Конспекты" or message.text == "/get_notes")
+async def send_notes(message: types.Message):
+    buttons = []
+    subjects = []
+    notes = await get_notes()
+    for note in notes:
+        if note is None:
+            continue
+        subject = note['subject']
+        if subject not in subjects:
+            subjects.append(subject)
+            buttons.append(types.InlineKeyboardButton(subject, callback_data=f'subject{subject}'))
+    inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
+    await message.answer("По какому предмету Вы хотите получить конспекты?", reply_markup=inline_kb1)
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject'))
+async def process_callback_homework(callback_query: types.CallbackQuery):
+    subject = callback_query.data[7:]
+    id = callback_query.from_user.id
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(id, 'Записи:', reply_markup=get_keyboard())
+    notes = await get_notes()
+    last_date = datetime.date(2000, 1, 1)
+    to_send = ''
+    for note in notes:
+        if note is None:
+            continue
+        date = datetime.datetime.strptime(note['date'], '%Y-%m-%d').date()
+        if subject == note['subject'] and note['is_new'] and date > last_date:
+            to_send = note['files']
+    for file in to_send:
+        await bot.send_photo(id, photo=file['file']['url'], )        
+
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
 async def send_homework(message: types.Message):
     isoweekday = datetime.date.today().isoweekday()
     buttons = []
     if isoweekday != 7:
-        buttons.append(types.InlineKeyboardButton('Сегодня', callback_data=f'btn{isoweekday}'))
+        buttons.append(types.InlineKeyboardButton('Сегодня', callback_data=f'homework{isoweekday}'))
     if isoweekday == 6 or isoweekday == 7:
         for i in range(1, 7):
-            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'btn{i}'))
+            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'homework{i}'))
     else:
         for i in range(isoweekday+1, 7):
-            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'btn{i}'))
+            buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'homework{i}'))
     inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=inline_kb1)
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('btn'))
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('homework'))
 async def process_callback_homework(callback_query: types.CallbackQuery):
     code = callback_query.data[-1]
     if code.isdigit():

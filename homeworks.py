@@ -21,9 +21,9 @@ async def get_homework(date):
             homeworks = []
 
             for homework in homework_list_result:
-                movie_dict = await map_notion_result_to_homework(homework)
-                if movie_dict['deadline'] == str(date):
-                    homeworks.append(movie_dict)
+                homework_dict = await map_notion_result_to_homework(homework)
+                if homework_dict['deadline'] == str(date):
+                    homeworks.append(homework_dict)
 
             return homeworks
 
