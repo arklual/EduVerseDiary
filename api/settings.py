@@ -39,6 +39,10 @@ SUBJECTS = [
         'name': 'История',
         'id': '13',
     },
+    {
+        'name': 'Математика',
+        'id': '28'
+    }
 ]
 
 SUBJECTS_ENGLISH_1 = [
