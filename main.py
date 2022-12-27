@@ -98,22 +98,23 @@ async def send_notes(message: types.Message):
     await message.answer("По какому предмету Вы хотите получить конспекты?", reply_markup=inline_kb1)
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('subject'))
-async def process_callback_homework(callback_query: types.CallbackQuery):
+async def process_callback_notes(callback_query: types.CallbackQuery):
     subject = callback_query.data[7:]
     id = callback_query.from_user.id
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(id, 'Записи:', reply_markup=get_keyboard())
+    await bot.send_message(id, f'Записи по предмету {subject}:', reply_markup=get_keyboard())
     notes = await get_notes()
-    last_date = datetime.date(2000, 1, 1)
-    to_send = ''
+    to_send = []
     for note in notes:
         if note is None:
             continue
-        date = datetime.datetime.strptime(note['date'], '%Y-%m-%d').date()
-        if subject == note['subject'] and note['is_new'] and date > last_date:
-            to_send = note['files']
-    for file in to_send:
-        await bot.send_photo(id, photo=file['file']['url'], )        
+        if subject == note['subject'] and note['is_new']:
+            to_send += [note['files']]
+    for n in to_send:
+        media = types.MediaGroup()
+        for file in n:
+            media.attach_photo(file['file']['url'])
+        await bot.send_media_group(id, media)     
 
 @dp.message_handler(lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
 async def send_homework(message: types.Message):
@@ -153,8 +154,7 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
     for hw in hws:
         await bot.send_message(id, hbold("Предмет: ")+hw['subject']+hbold("\nЗадание: ")+hw['task'], reply_markup=get_keyboard())
         for file in hw['files']:
-            if file['name'][-4:] == '.jpg':
-                
+            if file['name'][-4:] == '.jpg':   
                 await bot.send_photo(id, photo=file['file']['url'], )
             else:
                 await bot.send_document(id, document=file['file']['url'])
