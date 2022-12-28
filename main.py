@@ -72,7 +72,17 @@ async def send_marks(message: types.Message):
             for subject in st.subjects:
                 if subject.marks != []:
                     marks = prettify_marks(subject.marks)
-                    await message.answer(f'{subject.name} {subject.average_mark} {marks}', reply_markup=get_keyboard())
+                    sign = ''
+                    prediction = round(float(subject.average_mark))
+                    if prediction == 5:
+                        sign = '🟢'
+                    elif prediction == 4:
+                        sign = '🔵'
+                    elif prediction == 3:
+                        sign = '🟡'
+                    elif prediction == 2:
+                        sign = '🔴'
+                    await message.answer(f'{subject.name} {sign}{subject.average_mark} {marks}', reply_markup=get_keyboard())
 
 @dp.message_handler(lambda message: message.text == "Расписание звонков" or message.text == "/get_schedule")
 async def send_schedule(message: types.Message):
