@@ -17,6 +17,16 @@ bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
 api = School33Api(skip_update_marks=False)
 
+def round_number(num, cnt = 0):
+    z = 1 if num > 0 else -1
+    num *= z
+    k = 10**cnt
+    num *= k*10
+    if num%10 >= 5:
+        num = num + 10
+    num = int(num/10)
+    return num/k*z
+
 def get_keyboard():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_1 = types.KeyboardButton(text="Оценки")
@@ -73,7 +83,7 @@ async def send_marks(message: types.Message):
                 if subject.marks != []:
                     marks = prettify_marks(subject.marks)
                     sign = ''
-                    prediction = round(float(subject.average_mark))
+                    prediction = round_number(float(subject.average_mark))
                     if prediction == 5:
                         sign = '🟢'
                     elif prediction == 4:
