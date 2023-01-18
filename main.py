@@ -11,6 +11,7 @@ from collections import Counter
 import datetime
 from aiogram.utils.exceptions import ChatNotFound
 import homeworks
+from quizes import get_training
 from notes import get_notes
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
@@ -150,6 +151,29 @@ async def send_homework(message: types.Message):
             buttons.append(types.InlineKeyboardButton(WEEK_DAYS[i], callback_data=f'homework{i}'))
     inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=inline_kb1)
+
+@dp.message_handler(lambda message: message.text == "Тренировка" or message.text == "/quizes")
+async def send_quix_menu(message: types.Message):
+    isoweekday = datetime.date.today().isoweekday()
+    buttons = []
+    buttons.append(types.InlineKeyboardButton('Химия', callback_data=f'quiz1'))
+    inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
+    await message.answer("По какому прдеметы ты хочешь потренироваться?", reply_markup=inline_kb1)
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('quiz'))
+async def process_callback_quiz(callback_query: types.CallbackQuery):
+    code = callback_query.data[-1]
+    if code.isdigit():
+        code = int(code)
+    id = callback_query.from_user.id
+    if code == 1:
+        ts = await get_training()
+        for t in ts:
+            try:
+                await bot.send_photo(id, t['task'][0]['file']['url'])
+            except:
+                pass
+    await bot.answer_callback_query(callback_query.id)
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('homework'))
 async def process_callback_homework(callback_query: types.CallbackQuery):

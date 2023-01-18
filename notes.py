@@ -1,4 +1,5 @@
 import aiohttp
+import asyncio
 
 token = 'secret_TObnT0Zb9Qb55PHwIdymijzdmNrFJCZnal3hwYYBuoc'
 database_id = 'ae3b7c2c64084722a2a903eb84c16d5c'
@@ -15,7 +16,7 @@ async def get_notes():
             notes = []
             for note in note_list_result:
                 note_dict = await map_notion_result_to_note(note)
-                notes.append(notes.append(note_dict))
+                notes.append(note_dict)
             return notes
 
 
@@ -25,9 +26,11 @@ async def map_notion_result_to_note(result):
     date = properties['Дата конспекта']['date']['start']
     files = properties['Конспект']['files']
     is_new = properties['Новая тема?']['checkbox']
+    theme = properties['Тема']['title'][0]['plain_text']
     return {
         'subject': subject,
         'date': date,
         'is_new': is_new,
         'files': files,
+        'theme': theme,
     }
