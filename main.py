@@ -210,7 +210,7 @@ async def send_if_new_marks():
         if students[i].subjects != api.students[i].subjects:
             last_name = students[i].name.split(' ')[1]
             id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
-            await bot.send_message('Выставили новый предмет.')
+            await bot.send_message(id, 'Выставили новый предмет.')
         for j in range(len(students[i].subjects)):
             if students[i].subjects[j].marks != api.students[i].subjects[j].marks:
                 last_name = students[i].name.split(' ')[1]
@@ -232,5 +232,9 @@ async def scheduler():
 async def on_startup(_):
     asyncio.create_task(scheduler())
 
-if __name__ == '__main__':
+async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
     executor.start_polling(dp, on_startup=on_startup)
+
+if __name__ == '__main__':
+    asyncio.run(main())
