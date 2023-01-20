@@ -16,7 +16,7 @@ from notes import get_notes
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
-api = School33Api(skip_update_marks=False)
+#api = School33Api(skip_update_marks=False)
 
 def round_number(num, cnt = 0):
     z = 1 if num > 0 else -1
@@ -205,7 +205,7 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
                 await bot.send_document(id, document=file['file']['url'])
 
 async def send_if_new_marks():
-    students = copy.deepcopy(api.students)
+    '''students = copy.deepcopy(api.students)
     api.update_marks()
     for i in range(len(api.students)):
         if students[i].subjects != api.students[i].subjects:
@@ -222,7 +222,7 @@ async def send_if_new_marks():
                         await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(res)}")
                 except ChatNotFound:
                     print(f"Can't send to {id} {last_name}")
-                    break
+                    break'''
 
 #async def scheduler():
 #    aioschedule.every(10).minutes.do(send_if_new_marks)
