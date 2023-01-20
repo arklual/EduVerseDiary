@@ -233,10 +233,7 @@ async def send_if_new_marks():
 async def on_startup(_):
     #asyncio.create_task(scheduler())
     pass
-
-async def main():
-    await bot.delete_webhook(drop_pending_updates=True)
-    executor.start_polling(dp, on_startup=on_startup)
+    
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    executor.start_polling(dp, on_startup=on_startup)
