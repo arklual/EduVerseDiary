@@ -16,7 +16,7 @@ from notes import get_notes
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
 dp = Dispatcher(bot)
-#api = School33Api(skip_update_marks=False)
+api = School33Api(skip_update_marks=False)
 
 def round_number(num, cnt = 0):
     z = 1 if num > 0 else -1
@@ -76,7 +76,7 @@ async def help_user(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == "Оценки" or message.text == "/get_marks")
 async def send_marks(message: types.Message):
-    '''last_name = LAST_NAMES[str(message.from_id)]
+    last_name = LAST_NAMES[str(message.from_id)]
     for st in api.students:
         if st.name.split(' ')[1] == last_name:
             await message.answer('Твои оценки:')
@@ -93,8 +93,7 @@ async def send_marks(message: types.Message):
                         sign = '🟡'
                     elif prediction == 2:
                         sign = '🔴'
-                    await message.answer(f'{subject.name} {sign}{subject.average_mark} {marks}', reply_markup=get_keyboard())'''
-    await message.answer(f'К сожалению, официальный сайт журнала сейчас не работает, поэтому я не могу узнать твои оценки.', reply_markup=get_keyboard())
+                    await message.answer(f'{subject.name} {sign}{subject.average_mark} {marks}', reply_markup=get_keyboard())
 
 @dp.message_handler(lambda message: message.text == "Расписание звонков" or message.text == "/get_schedule")
 async def send_schedule(message: types.Message):
@@ -205,7 +204,7 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
                 await bot.send_document(id, document=file['file']['url'])
 
 async def send_if_new_marks():
-    '''students = copy.deepcopy(api.students)
+    students = copy.deepcopy(api.students)
     api.update_marks()
     for i in range(len(api.students)):
         if students[i].subjects != api.students[i].subjects:
@@ -222,16 +221,16 @@ async def send_if_new_marks():
                         await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(res)}")
                 except ChatNotFound:
                     print(f"Can't send to {id} {last_name}")
-                    break'''
+                    break
 
-#async def scheduler():
-#    aioschedule.every(10).minutes.do(send_if_new_marks)
-#    while True:
-#        await aioschedule.run_pending()
-#        await asyncio.sleep(1)
+async def scheduler():
+    aioschedule.every(10).minutes.do(send_if_new_marks)
+    while True:
+        await aioschedule.run_pending()
+        await asyncio.sleep(1)
 
 async def on_startup(_):
-    #asyncio.create_task(scheduler())
+    asyncio.create_task(scheduler())
     pass
     
 
