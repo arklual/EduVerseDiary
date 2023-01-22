@@ -235,4 +235,4 @@ async def on_startup(_):
     
 
 if __name__ == '__main__':
-    executor.start_polling(dp, on_startup=on_startup)
+    executor.start_polling(dp)
