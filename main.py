@@ -11,7 +11,6 @@ from collections import Counter
 import datetime
 from aiogram.utils.exceptions import ChatNotFound
 import homeworks
-from quizes import get_training
 from notes import get_notes
 
 bot = Bot(token=TELEGRAM_TOKEN, parse_mode='HTML')
@@ -152,29 +151,6 @@ async def send_homework(message: types.Message):
     inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=inline_kb1)
 
-@dp.message_handler(lambda message: message.text == "Тренировка" or message.text == "/quizes")
-async def send_quix_menu(message: types.Message):
-    isoweekday = datetime.date.today().isoweekday()
-    buttons = []
-    buttons.append(types.InlineKeyboardButton('Химия', callback_data=f'quiz1'))
-    inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
-    await message.answer("По какому прдеметы ты хочешь потренироваться?", reply_markup=inline_kb1)
-
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('quiz'))
-async def process_callback_quiz(callback_query: types.CallbackQuery):
-    code = callback_query.data[-1]
-    if code.isdigit():
-        code = int(code)
-    id = callback_query.from_user.id
-    if code == 1:
-        ts = await get_training()
-        for t in ts:
-            try:
-                await bot.send_photo(id, t['task'][0]['file']['url'])
-            except:
-                pass
-    await bot.answer_callback_query(callback_query.id)
-
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('homework'))
 async def process_callback_homework(callback_query: types.CallbackQuery):
     code = callback_query.data[-1]
@@ -210,7 +186,13 @@ async def send_if_new_marks():
         if students[i].subjects != api.students[i].subjects:
             last_name = students[i].name.split(' ')[1]
             id = list(LAST_NAMES.keys())[list(LAST_NAMES.values()).index(last_name)]
-            await bot.send_message(id, 'Выставили новый предмет.')
+            for j in range(len(students[i].subjects), len(api.students[i].subjects)):
+                if api.students[i].subjects[j].marks != []:
+                    try:
+                        await bot.send_message(id, f"У тебя новые оценки по предмету {api.students[i].subjects[j].name}: {prettify_marks(api.students[i].subjects[j].marks)}")
+                    except ChatNotFound:
+                        print(f"Can't send to {id} {last_name}")
+                        break
         for j in range(len(students[i].subjects)):
             if students[i].subjects[j].marks != api.students[i].subjects[j].marks:
                 last_name = students[i].name.split(' ')[1]
@@ -231,8 +213,6 @@ async def scheduler():
 
 async def on_startup(_):
     asyncio.create_task(scheduler())
-    pass
-    
 
 if __name__ == '__main__':
-    executor.start_polling(dp)
+    executor.start_polling(dp, on_startup=on_startup)
