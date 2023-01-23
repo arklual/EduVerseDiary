@@ -84,7 +84,7 @@ async def send_marks(message: types.Message):
                 if subject.marks != []:
                     marks = prettify_marks(subject.marks)
                     sign = ''
-                    prediction = int(round_number(float(subject.average_mark)))
+                    prediction = round_number(float(subject.average_mark))
                     if prediction == 5:
                         sign = '🟢'
                     elif prediction == 4:
