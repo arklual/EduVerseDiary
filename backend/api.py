@@ -97,7 +97,7 @@ class EduDiaryAPI:
             for i in range(count_of_students):
                 marks_row = marks[i+count_of_students].text.strip().split('\n')
 
-                sub = Subject(marks[i].text.strip(), subject['name'])
+                sub = Subject(marks[i].text.strip(), '''subject['name']''')
                 self.__students__[i].subjects.append(sub)
                 for m in marks_row:
                     if m == '1' or m == '2' or m == '3' or m == '4' or m == '5':
