@@ -177,7 +177,8 @@ async def process_callback_homework(callback_query: types.CallbackQuery):
             if file['name'][-4:] == '.jpg':   
                 await bot.send_photo(id, photo=file['file']['url'], )
             else:
-                await bot.send_document(id, document=file['file']['url'])
+                f = types.InputFile.from_url(file['file']['url'])
+                await bot.send_document(id, f)
 
 async def send_if_new_marks():
     students = copy.deepcopy(api.students)
