@@ -1,11 +1,11 @@
 import asyncio
 from aiogram import Bot, Dispatcher
-import handlers_register
+from frontend import handlers_register
 
 async def main():
-    bot = Bot(token="5719666199:AAFmsqG46O4zzfsR-scdtBB-NHgo2v8W6qI")
+    bot = Bot(token="5719666199:AAFmsqG46O4zzfsR-scdtBB-NHgo2v8W6qI", parse_mode='html')
     dp = Dispatcher(bot)
-    await handlers_register.setup(dp)
+    await handlers_register.setup(dp, bot)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
