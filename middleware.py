@@ -1,5 +1,6 @@
-from backend import homework_api
+from backend import homework_api, notes_api
 from edutypes.homework import Homework
+from edutypes.notes import Note
 
 async def marks():
     pass
@@ -12,4 +13,9 @@ async def homework(date):
     return hws
 
 async def notes():
-    pass
+    notes = []
+    data = await notes_api.get_notes()
+    for note in data:
+        if not note is None and note['is_new']:
+            notes.append(Note(subject=note['subject'], files=note['files']))
+    return notes
