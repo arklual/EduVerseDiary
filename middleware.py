@@ -17,5 +17,5 @@ async def notes():
     data = await notes_api.get_notes()
     for note in data:
         if not note is None and note['is_new']:
-            notes.append(Note(subject=note['subject'], files=note['files']))
+            notes.append(Note(subject=note['subject'], files=note['files'], theme=note['theme']))
     return notes

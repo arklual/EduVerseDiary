@@ -22,11 +22,13 @@ async def get_notes():
 async def map_notion_result_to_note(result):
     properties = result['properties']
     subject = properties['Предмет']['multi_select'][0]['name']
+    theme = properties['Тема']['title'][0]['text']['content']
     date = properties['Дата конспекта']['date']['start']
     files = properties['Конспект']['files']
     is_new = properties['Новая тема?']['checkbox']
     return {
         'subject': subject,
+        'theme': theme,
         'date': date,
         'is_new': is_new,
         'files': files,
