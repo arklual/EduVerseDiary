@@ -1,14 +1,6 @@
 from aiogram import types
 import datetime
 
-def main():
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add("Оценки")
-    keyboard.add("Домашнее задание")
-    keyboard.add("Расписание звонков")
-    keyboard.add("Конспекты")
-    return keyboard
-
 def week():
     WEEKDAYS = [
         'Понедельник',

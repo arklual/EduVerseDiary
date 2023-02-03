@@ -1,7 +1,7 @@
 from aiogram.utils.markdown import hbold
 from aiogram import types
 import datetime
-from . import keyboards
+from frontend import keyboards
 
 
 async def start(message: types.Message):

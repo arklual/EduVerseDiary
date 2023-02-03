@@ -1,4 +1,5 @@
 from . import keyboards
+from frontend.keyboards import main as keyboard_main
 from aiogram import types
 from aiogram.utils.markdown import hbold
 import datetime
@@ -34,11 +35,11 @@ async def homework(callback_query: types.CallbackQuery):
         hws = await middleware.homework(date)
 
     
-    await bot.send_message(id, 'Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboards.main())
+    await bot.send_message(id, 'Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main())
     if hws == []:
-        await bot.send_message(id, 'Домашнего задания на этот день ещё нет.', reply_markup=keyboards.main())
+        await bot.send_message(id, 'Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main())
     for hw in hws:
-        await bot.send_message(id, hbold("Предмет: ")+hw.subject+hbold("\nЗадание: ")+hw.task, reply_markup=keyboards.main())
+        await bot.send_message(id, hbold("Предмет: ")+hw.subject+hbold("\nЗадание: ")+hw.task, reply_markup=keyboard_main())
         for file in hw.files:
             if file['name'].split('.')[-1] == 'jpg':   
                 await bot.send_photo(id, photo=file['file']['url'], )
