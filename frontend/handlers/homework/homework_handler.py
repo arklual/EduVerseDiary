@@ -37,6 +37,7 @@ async def homework(call: types.CallbackQuery):
     await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main())
     if hws == []:
         await call.message.answer('Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main())
+    await call.answer()
     for hw in hws:
         await call.message.answer(hbold("Предмет: ")+hw.subject+hbold("\nЗадание: ")+hw.task, reply_markup=keyboard_main())
         for file in hw.files:
@@ -45,7 +46,6 @@ async def homework(call: types.CallbackQuery):
             else:
                 f = types.InputFile.from_url(file['file']['url'])
                 await call.message.answer_document(id, f)
-    await call.answer()
 
 async def setup(dp):
     print('Register homework handler...', end='')
