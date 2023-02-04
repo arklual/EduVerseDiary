@@ -17,5 +17,6 @@ async def notes():
     data = await notes_api.get_notes()
     for note in data:
         if not note is None and note['is_new']:
-            notes.append(Note(subject=note['subject'], files=note['files'], theme=note['theme']))
+            notes.append(Note(subject=note['subject'], files=note['files'], theme=note['theme'], date=note['date']))
+    notes = sorted(notes, key=lambda x: x.date)
     return notes
