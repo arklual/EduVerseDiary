@@ -32,6 +32,8 @@ async def schedule(message: types.Message):
         await message.answer("1. 8.30-9.15\n2. 9.25-10.10\n3. 10.25-11.10\n4. 11.25-12.10\n5. 12.25-13.10\n6. 13.20-14.05\n7. 14.15-14.55", reply_markup=keyboards.main())
 
 async def setup(dp):
+    print('Register general handler...', end='')
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(help, commands=['help'])
     dp.register_message_handler(schedule, lambda message: message.text == "Расписание звонков" or message.text == "/get_schedule")
+    print('Succsess')

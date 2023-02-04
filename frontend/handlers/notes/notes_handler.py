@@ -11,15 +11,11 @@ async def notes_menu(message: types.Message):
 async def subject_menu(call: types.CallbackQuery):
     subject = call.data[7:]
     await call.message.answer(f'Выбери тему конспекта:', reply_markup=main_keyboard())
-    notes = await middleware.notes()
-    themes = []
-    for note in notes:
-        if subject == note.subject:
-            themes += [note.theme]
-    messege = ''
-    for i in range(len(themes)):
-        messege += f'{i+1}. {themes[i]}\n'
-    await call.message.answer(messege, reply_markup=keyboards.themes(subject, len(themes)))  
+    themes = await middleware.get_themes_of_notes(subject)
+    message = ''
+    for i, theme in enumerate(themes):
+        message += f'{i+1}. {theme}\n'
+    await call.message.answer(message, reply_markup=keyboards.themes(subject, len(themes)))  
     await call.answer()   
 
 async def notes(call: types.CallbackQuery):

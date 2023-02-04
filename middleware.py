@@ -1,6 +1,7 @@
 from backend import homework_api, notes_api
 from edutypes.homework import Homework
 from edutypes.notes import Note
+import middleware
 
 async def marks():
     pass
@@ -20,3 +21,11 @@ async def notes():
             notes.append(Note(subject=note['subject'], files=note['files'], theme=note['theme'], date=note['date']))
     notes = sorted(notes, key=lambda x: x.date)
     return notes
+
+async def get_themes_of_notes(subject):
+    themes = []
+    notes = await middleware.notes()
+    for note in notes:
+        if subject == note.subject:
+            themes += [note.theme]
+    return themes
