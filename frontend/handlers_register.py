@@ -7,3 +7,4 @@ async def setup(dp):
     await notes_handler.setup(dp)
     await general_handler.setup(dp)
     await homework_handler.setup(dp)
+    await marks_handler.setup(dp)
