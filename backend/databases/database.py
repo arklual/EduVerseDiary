@@ -15,7 +15,7 @@ class Database:
         await self.__conn__.close()
 
     async def get_students(self):
-        cur = await self.__conn__.execute('SELECT * FROM students ORDER BY last_name')
+        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group FROM students ORDER BY last_name')
         sts = await cur.fetchall()
         await cur.close()
         students = []
@@ -30,7 +30,7 @@ class Database:
         return students
     
     async def get_student_by_id(self, telegram_id):
-        cur = await self.__conn__.execute('SELECT * FROM students WHERE telegram_id = ?', (telegram_id,))
+        cur = await self.__conn__.execute('SELECT  FROM students WHERE telegram_id = ?', (telegram_id,))
         student = await cur.fetchone()
         await cur.close()
         student = list(student)
@@ -52,27 +52,27 @@ class Database:
         await self.__conn__.commit()
     
     async def get_students_marks(self, student):
-        cur = await self.__conn__.execute('SELECT * FROM marks WHERE student = ?', (student.telegram_id,))
+        cur = await self.__conn__.execute('SELECT student, mark, subject FROM marks WHERE student = ?', (student.telegram_id,))
         mrks = await cur.fetchall()
         await cur.close()
         marks = []
         for mark in mrks:
             mark = list(mark)
             db = await database.Database.setup()
-            mark = Mark(student=str(mark[1]), mark=str(mark[2]), subject=Subject(id=str(mark[3]), name=(await db.get_subject_by_id(mark[3])).name))
+            mark = Mark(student=str(mark[0]), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
             await db.close_connection()
             marks.append(mark)
         return marks
     
     async def get_students_marks_in(self, student, subject):
-        cur = await self.__conn__.execute('SELECT * FROM marks WHERE student = ? AND subject = ?', (student.telegram_id, subject.id, ))
+        cur = await self.__conn__.execute('SELECT student, mark, subject FROM marks WHERE student = ? AND subject = ?', (student.telegram_id, subject.id, ))
         mrks = await cur.fetchall()
         await cur.close()
         marks = []
         for mark in mrks:
             mark = list(mark)
             db = await database.Database.setup()
-            mark = Mark(student=str(mark[1]), mark=str(mark[2]), subject=Subject(id=str(mark[3]), name=(await db.get_subject_by_id(mark[3])).name))
+            mark = Mark(student=str(mark[0]), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
             await db.close_connection()
             marks.append(mark)
         return marks
@@ -94,19 +94,19 @@ class Database:
         await self.__conn__.commit()
 
     async def get_subject_by_id(self, subject_id):
-        cur = await self.__conn__.execute('SELECT * FROM subjects WHERE id = ?', (subject_id, ))
-        subject = list(await cur.fetchone())[1]
+        cur = await self.__conn__.execute('SELECT name FROM subjects WHERE id = ?', (subject_id, ))
+        subject = list(await cur.fetchone())[0]
         await cur.close()
         return Subject(str(subject_id), subject)
     
     async def get_subject_by_name(self, subject_name):
-        cur = await self.__conn__.execute('SELECT * FROM subjects WHERE name = ?', (subject_name, ))
+        cur = await self.__conn__.execute('SELECT id FROM subjects WHERE name = ?', (subject_name, ))
         id = list(await cur.fetchone())[0]
         await cur.close()
         return Subject(str(id), subject_name)
     
     async def get_subjects(self):
-        cur = await self.__conn__.execute('SELECT * FROM subjects')
+        cur = await self.__conn__.execute('SELECT id, name FROM subjects')
         sbs = await cur.fetchall()
         await cur.close()
         subjects = []
