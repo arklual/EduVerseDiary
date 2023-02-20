@@ -1,7 +1,6 @@
 import aiosqlite
-import asyncio
-from edutypes.student import Student, Gender, EnglishGroup
-from edutypes.mark import Mark
+from backend.databases import database
+from edutypes import Student, Gender, EnglishGroup, Mark, Subject
 
 class Database:
     def __init__(self, conn) -> None:
@@ -12,17 +11,17 @@ class Database:
         conn = await aiosqlite.connect('./backend/databases/data.sqlite3')
         return Database(conn)
     
-    async def close_db(self):
+    async def close_connection(self):
         await self.__conn__.close()
 
     async def get_students(self):
-        cur = await self.__conn__.execute('SELECT * FROM students')
+        cur = await self.__conn__.execute('SELECT * FROM students ORDER BY last_name')
         sts = await cur.fetchall()
         await cur.close()
         students = []
         for student in sts:
             student = list(student)
-            student = Student(telegram_id=student[0],
+            student = Student(telegram_id=str(student[0]),
                             first_name=student[1], 
                             last_name=student[2], 
                             gender=Gender(student[3]), 
@@ -35,7 +34,7 @@ class Database:
         student = await cur.fetchone()
         await cur.close()
         student = list(student)
-        student = Student(telegram_id=student[0],
+        student = Student(telegram_id=str(student[0]),
                         first_name=student[1], 
                         last_name=student[2], 
                         gender=Gender(student[3]), 
@@ -48,7 +47,7 @@ class Database:
         await self.__conn__.commit()
     
     async def add_mark(self, mark):
-        mark = (mark.student.telegram_id, mark.mark, mark.subject)
+        mark = (mark.student.telegram_id, mark.mark, mark.subject.id)
         await self.__conn__.execute("INSERT INTO marks (student, mark, subject) VALUES(?, ?, ?);", mark)
         await self.__conn__.commit()
     
@@ -59,17 +58,84 @@ class Database:
         marks = []
         for mark in mrks:
             mark = list(mark)
-            mark = Mark(student=mark[1], mark=mark[2], subject=mark[3])
+            db = await database.Database.setup()
+            mark = Mark(student=str(mark[1]), mark=str(mark[2]), subject=Subject(id=str(mark[3]), name=(await db.get_subject_by_id(mark[3])).name))
+            await db.close_connection()
             marks.append(mark)
         return marks
     
-    async def get_students_marks_by(self, student, subject):
-        cur = await self.__conn__.execute('SELECT * FROM marks WHERE student = ? AND subject = ?', (student.telegram_id, subject, ))
+    async def get_students_marks_in(self, student, subject):
+        cur = await self.__conn__.execute('SELECT * FROM marks WHERE student = ? AND subject = ?', (student.telegram_id, subject.id, ))
         mrks = await cur.fetchall()
         await cur.close()
         marks = []
         for mark in mrks:
             mark = list(mark)
-            mark = Mark(student=mark[1], mark=mark[2], subject=mark[3])
+            db = await database.Database.setup()
+            mark = Mark(student=str(mark[1]), mark=str(mark[2]), subject=Subject(id=str(mark[3]), name=(await db.get_subject_by_id(mark[3])).name))
+            await db.close_connection()
             marks.append(mark)
         return marks
+
+    async def remove_students_marks_in(self, student, subject):
+        await self.__conn__.execute('DELETE FROM marks WHERE student = ? AND subject = ?', (student.telegram_id, subject.id, ))
+        await self.__conn__.commit()
+    
+    async def remove_marks_in(self, subject):
+        await self.__conn__.execute('DELETE FROM marks WHERE subject = ?', (subject.id, ))
+        await self.__conn__.commit()
+    
+    async def remove_marks(self):
+        await self.__conn__.execute('DELETE FROM marks')
+        await self.__conn__.commit()
+
+    async def reset_marks_ids(self):
+        await self.__conn__.execute('DELETE FROM sqlite_sequence WHERE name="marks"')
+        await self.__conn__.commit()
+
+    async def get_subject_by_id(self, subject_id):
+        cur = await self.__conn__.execute('SELECT * FROM subjects WHERE id = ?', (subject_id, ))
+        subject = list(await cur.fetchone())[1]
+        await cur.close()
+        return Subject(str(subject_id), subject)
+    
+    async def get_subject_by_name(self, subject_name):
+        cur = await self.__conn__.execute('SELECT * FROM subjects WHERE name = ?', (subject_name, ))
+        id = list(await cur.fetchone())[0]
+        await cur.close()
+        return Subject(str(id), subject_name)
+    
+    async def get_subjects(self):
+        cur = await self.__conn__.execute('SELECT * FROM subjects')
+        sbs = await cur.fetchall()
+        await cur.close()
+        subjects = []
+        for sub in sbs:
+            subjects.append(Subject(id=list(sub)[0], name=list(sub)[1]))
+        return subjects
+
+    async def get_bot_token(self):
+        cur = await self.__conn__.execute('SELECT token FROM bot')
+        (token,) = await cur.fetchone()
+        await cur.close()
+        return token
+
+    async def get_username(self):
+        cur = await self.__conn__.execute('SELECT username FROM bot')
+        (username, ) = await cur.fetchone()
+        username = username.replace('_', '')
+        await cur.close()
+        return username
+
+    async def get_password(self):
+        cur = await self.__conn__.execute('SELECT password FROM bot')
+        (password, ) = await cur.fetchone()
+        password = password.replace('_', '')
+        await cur.close()
+        return password
+
+    async def get_notion_token(self):
+        cur = await self.__conn__.execute('SELECT notion_token FROM bot')
+        (token,) = await cur.fetchone()
+        await cur.close()
+        return token

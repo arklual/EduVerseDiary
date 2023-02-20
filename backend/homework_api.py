@@ -1,11 +1,14 @@
 import aiohttp
 import datetime
+from backend.databases.database import Database
 
-token = 'secret_TObnT0Zb9Qb55PHwIdymijzdmNrFJCZnal3hwYYBuoc'
 database_id = '8b2cb4fdac3044f09ae3187392132482'
 
 
 async def get_homework(date):
+    db = await Database.setup()
+    token = await db.get_notion_token()
+    await db.close_connection()
     url = f'https://api.notion.com/v1/databases/{database_id}/query'
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers={

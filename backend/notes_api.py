@@ -1,9 +1,12 @@
 import aiohttp
+from backend.databases.database import Database
 
-token = 'secret_TObnT0Zb9Qb55PHwIdymijzdmNrFJCZnal3hwYYBuoc'
 database_id = 'ae3b7c2c64084722a2a903eb84c16d5c'
 
 async def get_notes():
+    db = await Database.setup()
+    token = await db.get_notion_token()
+    await db.close_connection()
     url = f'https://api.notion.com/v1/databases/{database_id}/query'
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers={
