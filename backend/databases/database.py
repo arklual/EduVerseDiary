@@ -30,7 +30,7 @@ class Database:
         return students
     
     async def get_student_by_id(self, telegram_id):
-        cur = await self.__conn__.execute('SELECT  FROM students WHERE telegram_id = ?', (telegram_id,))
+        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group FROM students WHERE telegram_id = ?', (telegram_id,))
         student = await cur.fetchone()
         await cur.close()
         student = list(student)
@@ -139,3 +139,27 @@ class Database:
         (token,) = await cur.fetchone()
         await cur.close()
         return token
+    
+    async def hw_exists(self, homework, student):
+        homework = (student.telegram_id, '_'+homework.task_id,)
+        cur = await self.__conn__.execute('SELECT EXISTS(SELECT * FROM homeworks WHERE student=? AND task_id=?);', homework)
+        (exists, ) = await cur.fetchone()
+        await cur.close()
+        return bool(exists)
+
+    async def add_homework(self, homework, student):
+        homework = (student.telegram_id, '_'+homework.task_id,)
+        await self.__conn__.execute("INSERT INTO homeworks (student, task_id) VALUES(?, ?);", homework)
+        await self.__conn__.commit()
+
+    async def change_homework_done(self, homework, student, is_done=False):
+        homework = (int(is_done), student.telegram_id, '_'+homework.task_id,)
+        await self.__conn__.execute("UPDATE homeworks SET is_done=? WHERE student=? AND task_id=?", homework)
+        await self.__conn__.commit()
+    
+    async def is_homework_done(self, homework, student):
+        homework = (student.telegram_id, '_'+homework.task_id,)
+        cur = await self.__conn__.execute('SELECT is_done FROM homeworks WHERE student=? AND task_id=?', homework)
+        (is_done, ) = await cur.fetchone()
+        await cur.close()
+        return bool(is_done)

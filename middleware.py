@@ -23,11 +23,19 @@ def round_number(num, cnt = 0):
     num = int(num/10)
     return num/k*z
 
-async def homework(date):
+async def homework(date, telegram_id):
     hws = []
     data = await homework_api.get_homework(date)
+    db = await Database.setup()
     for hw in data:
-        hws.append(Homework(subject=hw['subject'], task=hw['task'], files=hw['files'], deadline=date))
+        hws.append(Homework(subject=hw['subject'], task=hw['task'], files=hw['files'], deadline=date, task_id=hw['id']))
+        hw = hws[len(hws)-1]
+        student = await db.get_student_by_id(telegram_id)
+        if not await db.hw_exists(hw, student):
+            await db.add_homework(hw, student)
+        else:
+            hws[len(hws)-1].is_done = await db.is_homework_done(hw, student)
+    await db.close_connection()
     return hws
 
 async def notes():

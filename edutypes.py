@@ -56,6 +56,7 @@ class Homework:
     task: str
     deadline: date
     files: list
+    task_id: str
 
 
 @dataclass

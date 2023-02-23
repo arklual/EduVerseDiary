@@ -24,3 +24,9 @@ def week():
             buttons.append(types.InlineKeyboardButton(WEEKDAYS[i], callback_data=f'homework{i}'))
     inline_kb1 = types.InlineKeyboardMarkup().add(*buttons)
     return inline_kb1
+
+
+def is_done_checkbox(homework, is_done=False):
+    text = '✅ Сделано' if is_done else '❌ Не сделано'
+    kb = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(text, callback_data=f'isdone{homework.task_id}'))
+    return kb

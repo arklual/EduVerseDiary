@@ -4,12 +4,15 @@ from frontend import handlers_register
 from backend import marks_api
 import aioschedule
 from backend.databases.database import Database
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
 
 async def main():
     db = await Database.setup()
     bot = Bot(token=await db.get_bot_token(), parse_mode='html')
+    storage = MemoryStorage()
     await db.close_connection()
-    dp = Dispatcher(bot)
+    dp = Dispatcher(bot, storage=storage)
     await handlers_register.setup(dp)
     await bot.delete_webhook(drop_pending_updates=True)
     asyncio.create_task(scheduler())
