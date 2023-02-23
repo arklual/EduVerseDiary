@@ -72,3 +72,9 @@ class Mark:
     student: Student
     mark: str
     subject: Subject
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return (self.student.telegram_id == other.student.telegram_id) and (self.mark == other.mark) and (self.subject.id == other.subject.id)
+        else:
+            return False

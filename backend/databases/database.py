@@ -59,7 +59,7 @@ class Database:
         for mark in mrks:
             mark = list(mark)
             db = await database.Database.setup()
-            mark = Mark(student=str(mark[0]), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
+            mark = Mark(student=(await db.get_student_by_id(str(mark[0]))), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
             await db.close_connection()
             marks.append(mark)
         return marks
@@ -72,7 +72,7 @@ class Database:
         for mark in mrks:
             mark = list(mark)
             db = await database.Database.setup()
-            mark = Mark(student=str(mark[0]), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
+            mark = Mark(student=await(db.get_student_by_id(str(mark[0]))), mark=str(mark[1]), subject=Subject(id=str(mark[2]), name=(await db.get_subject_by_id(mark[2])).name))
             await db.close_connection()
             marks.append(mark)
         return marks
@@ -111,7 +111,7 @@ class Database:
         await cur.close()
         subjects = []
         for sub in sbs:
-            subjects.append(Subject(id=list(sub)[0], name=list(sub)[1]))
+            subjects.append(Subject(id=str(list(sub)[0]), name=list(sub)[1]))
         return subjects
 
     async def get_bot_token(self):

@@ -1,6 +1,6 @@
 from aiogram import types
 import middleware
-from backend.marks_api import update_marks as um
+from middleware import send_new_marks as um
 
 async def marks(message: types.Message):
     messages = await middleware.marks(message.from_id)
@@ -9,7 +9,7 @@ async def marks(message: types.Message):
 
 ### TEMP
 async def update_marks(message: types.Message):
-    await um()
+    await um(message.bot)
 ###
 
 async def setup(dp):

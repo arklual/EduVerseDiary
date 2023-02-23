@@ -74,7 +74,7 @@ class EduDiaryAPI:
                                 mark = Mark(students[i], mark=m, subject=subject)
                                 result.append(mark)
                 return result
-    
+            
 async def update_marks():
     db = await Database.setup()
     subjects = await db.get_subjects()
@@ -97,3 +97,4 @@ async def update_marks():
     ####
     bar.finish()
     await db.close_connection()
+    return marks

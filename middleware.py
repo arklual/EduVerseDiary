@@ -1,6 +1,10 @@
 from backend import homework_api, notes_api, marks_api
 from edutypes import Homework, Note, Mark
 from backend.databases.database import Database
+from collections import Counter
+from aiogram.utils.exceptions import ChatNotFound
+from aiogram import Bot
+from backend.marks_api import update_marks
 import middleware
 
 def prettify_marks(marks):
@@ -91,3 +95,29 @@ async def marks(telegram_id):
         average_mark = round(sum(marks)/len(marks), 2)
         messages[i] = message.split(': ')[0] + f' {sign}{average_mark}: ' + message.split(': ')[1]
     return messages
+
+async def send_new_marks(bot: Bot):
+    db = await Database.setup()
+    old_marks = []
+    students = await db.get_students()
+    for student in students:
+        old_student_marks = await db.get_students_marks(student)
+        old_marks += old_student_marks
+    await db.close_connection()
+    t_new_marks = await update_marks()
+    new_marks = []
+    for row in t_new_marks:
+        new_marks += row
+    new_marks = sorted(new_marks, key=lambda x: x.student.telegram_id)
+    old_marks = sorted(old_marks, key=lambda x: x.student.telegram_id)
+    if str(old_marks) == str(new_marks):
+        print('Marks aren\'t changed')
+    else:
+        print('Marks are changed')
+        for mark in old_marks:
+            new_marks.remove(mark)
+        for mark in new_marks:
+            try:
+                await bot.send_message(mark.student.telegram_id, f"У тебя новая отметка по предмету {mark.subject.name}: {prettify_marks(mark.mark)}")
+            except ChatNotFound:
+                print(f"Can't send to {mark.student.telegram_id} {mark.student.last_name}")
