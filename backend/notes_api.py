@@ -33,6 +33,5 @@ async def map_notion_result_to_note(result):
         'subject': subject,
         'theme': theme,
         'date': date,
-        'is_new': is_new,
         'files': files,
     }

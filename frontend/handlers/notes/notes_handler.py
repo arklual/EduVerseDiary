@@ -36,7 +36,7 @@ async def notes(call: types.CallbackQuery):
 
 async def setup(dp):
     print('Register notes handler...', end='')
-    dp.register_message_handler(notes_menu, lambda message: message.text == "Конспекты" or message.text == "/get_notes")
+    dp.register_message_handler(notes_menu, lambda message: message.text == "📒 Конспекты" or message.text == "/get_notes")
     dp.register_callback_query_handler(subject_menu, lambda c: c.data and c.data.startswith('subject'))
     dp.register_callback_query_handler(notes, lambda c: c.data and c.data.startswith('theme'))
     print('Succsess')

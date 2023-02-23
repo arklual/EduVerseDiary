@@ -14,7 +14,7 @@ async def update_marks(message: types.Message):
 
 async def setup(dp):
     print('Register marks handler...', end='')
-    dp.register_message_handler(marks, lambda message: message.text == "Оценки" or message.text == "/get_marks")
+    dp.register_message_handler(marks, lambda message: message.text == "🧮 Оценки" or message.text == "/get_marks")
     ###temp
     dp.register_message_handler(update_marks, lambda message: message.text == "up" or message.text == "/update_marks")
     ###

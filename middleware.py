@@ -28,13 +28,14 @@ async def homework(date, telegram_id):
     data = await homework_api.get_homework(date)
     db = await Database.setup()
     for hw in data:
-        hws.append(Homework(subject=hw['subject'], task=hw['task'], files=hw['files'], deadline=date, task_id=hw['id']))
-        hw = hws[len(hws)-1]
-        student = await db.get_student_by_id(telegram_id)
-        if not await db.hw_exists(hw, student):
-            await db.add_homework(hw, student)
-        else:
-            hws[len(hws)-1].is_done = await db.is_homework_done(hw, student)
+        if not hw is None:
+            hws.append(Homework(subject=hw['subject'], task=hw['task'], files=hw['files'], deadline=date, task_id=hw['id']))
+            hw = hws[len(hws)-1]
+            student = await db.get_student_by_id(telegram_id)
+            if not await db.hw_exists(hw, student):
+                await db.add_homework(hw, student)
+            else:
+                hws[len(hws)-1].is_done = await db.is_homework_done(hw, student)
     await db.close_connection()
     return hws
 
@@ -42,7 +43,7 @@ async def notes():
     notes = []
     data = await notes_api.get_notes()
     for note in data:
-        if not note is None and note['is_new']:
+        if not note is None:
             notes.append(Note(subject=note['subject'], files=note['files'], theme=note['theme'], date=note['date']))
     notes = sorted(notes, key=lambda x: x.date)
     return notes

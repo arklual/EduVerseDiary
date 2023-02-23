@@ -50,8 +50,6 @@ async def homework(call: types.CallbackQuery):
         is_done = await db.is_homework_done(hw, await db.get_student_by_id(id))
         await db.close_connection()
         await call.message.answer(hbold("Предмет: ")+hw.subject+hbold("\nЗадание: ")+hw.task, reply_markup=keyboards.is_done_checkbox(hw, is_done))
-        # hbold("\nСтатус: ")+str(hw.is_done).replace('True', 'Сделано').replace('False', 'Не сделано')
-        # TODO checkbox with hw state, also rewrite all dialogs with aiogram dialog
         for file in hw.files:
             if file['name'].split('.')[-1] == 'jpg':   
                 await call.message.answer_photo(photo=file['file']['url'], )
@@ -72,7 +70,7 @@ async def is_done_changed(call: types.CallbackQuery):
 
 async def setup(dp):
     print('Register homework handler...', end='')
-    dp.register_message_handler(homework_menu, lambda message: message.text == "Домашнее задание" or message.text == "/get_homework")
+    dp.register_message_handler(homework_menu, lambda message: message.text == "📚 Домашнее задание" or message.text == "/get_homework")
     dp.register_callback_query_handler(homework, lambda c: c.data and c.data.startswith('homework'))
     dp.register_callback_query_handler(is_done_changed, lambda c: c.data and c.data.startswith('isdone'))
     print('Succsess')
