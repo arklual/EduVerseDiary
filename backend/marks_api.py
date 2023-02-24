@@ -87,14 +87,13 @@ async def update_marks():
         bar.next()
     bar.finish()
     await db.remove_marks()
-    #FIXME: send marks not working
     await db.reset_marks_ids()
     bar = Bar('Appending new marks', max=len(marks))
     for mark_row in marks:
         for mark in mark_row:
-            await db.add_mark(mark)
+            await db.add_mark(mark, commit=False)
         bar.next()
-    ####
+    await db.commit()
     bar.finish()
     await db.close_connection()
     return marks

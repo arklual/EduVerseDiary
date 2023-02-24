@@ -46,10 +46,11 @@ class Database:
         await self.__conn__.execute("INSERT INTO students (telegram_id, first_name, last_name, gender, english_group) VALUES(?, ?, ?, ?, ?);", student)
         await self.__conn__.commit()
     
-    async def add_mark(self, mark):
+    async def add_mark(self, mark, commit=True):
         mark = (mark.student.telegram_id, mark.mark, mark.subject.id)
         await self.__conn__.execute("INSERT INTO marks (student, mark, subject) VALUES(?, ?, ?);", mark)
-        await self.__conn__.commit()
+        if commit:
+            await self.__conn__.commit()
     
     async def get_students_marks(self, student):
         cur = await self.__conn__.execute('SELECT student, mark, subject FROM marks WHERE student = ?', (student.telegram_id,))
@@ -163,3 +164,6 @@ class Database:
         (is_done, ) = await cur.fetchone()
         await cur.close()
         return bool(is_done)
+    
+    async def commit(self):
+        await self.__conn__.commit()

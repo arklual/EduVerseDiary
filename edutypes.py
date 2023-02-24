@@ -31,7 +31,7 @@ class EnglishGroup(Enum):
             return 'Кельдина'
 
     def __repr__(self) -> str:
-        if self == Gender.MALE:
+        if self == EnglishGroup.MOLCHANOVA:
             return 'Molchanova'
         else:
             return 'Keldina'
