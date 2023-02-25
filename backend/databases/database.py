@@ -1,6 +1,6 @@
 import aiosqlite
 from backend.databases import database
-from edutypes import Student, Gender, EnglishGroup, Mark, Subject
+from edutypes import Student, Mark, Subject
 
 class Database:
     def __init__(self, conn) -> None:
@@ -15,7 +15,7 @@ class Database:
         await self.__conn__.close()
 
     async def get_students(self):
-        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group FROM students ORDER BY last_name')
+        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group, info_group FROM students ORDER BY last_name')
         sts = await cur.fetchall()
         await cur.close()
         students = []
@@ -24,27 +24,24 @@ class Database:
             student = Student(telegram_id=str(student[0]),
                             first_name=student[1], 
                             last_name=student[2], 
-                            gender=Gender(student[3]), 
-                            english_group=EnglishGroup(student[4]))
+                            gender=str(student[3]), 
+                            english_group=str(student[4]),
+                            info_group=str(student[5]))
             students.append(student)
         return students
     
     async def get_student_by_id(self, telegram_id):
-        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group FROM students WHERE telegram_id = ?', (telegram_id,))
+        cur = await self.__conn__.execute('SELECT telegram_id, first_name, last_name, gender, english_group, info_group FROM students WHERE telegram_id = ?', (telegram_id,))
         student = await cur.fetchone()
         await cur.close()
         student = list(student)
         student = Student(telegram_id=str(student[0]),
-                        first_name=student[1], 
-                        last_name=student[2], 
-                        gender=Gender(student[3]), 
-                        english_group=EnglishGroup(student[4]))
+                            first_name=student[1], 
+                            last_name=student[2], 
+                            gender=str(student[3]), 
+                            english_group=str(student[4]),
+                            info_group=str(student[5]))
         return student
-    
-    async def add_student(self, student):
-        student = (student.telegram_id, student.first_name, student.last_name, student.gender.value, student.english_group.value)
-        await self.__conn__.execute("INSERT INTO students (telegram_id, first_name, last_name, gender, english_group) VALUES(?, ?, ?, ?, ?);", student)
-        await self.__conn__.commit()
     
     async def add_mark(self, mark, commit=True):
         mark = (mark.student.telegram_id, mark.mark, mark.subject.id)

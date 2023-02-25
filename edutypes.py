@@ -3,39 +3,6 @@ from enum import Enum
 from datetime import date
 
 
-class Gender(Enum):
-    MALE = 1
-    FEMALE = 2
-
-    def __str__(self) -> str:
-        if self == Gender.MALE:
-            return 'male'
-        else:
-            return 'female'
-
-    def __repr__(self) -> str:
-        if self == Gender.MALE:
-            return 'male'
-        else:
-            return 'female'
-
-
-class EnglishGroup(Enum):
-    MOLCHANOVA = 1
-    KELDINA = 2
-
-    def __str__(self) -> str:
-        if self == EnglishGroup.MOLCHANOVA:
-            return 'Молчанова'
-        else:
-            return 'Кельдина'
-
-    def __repr__(self) -> str:
-        if self == EnglishGroup.MOLCHANOVA:
-            return 'Molchanova'
-        else:
-            return 'Keldina'
-
 @dataclass
 class Subject:
     id: str
@@ -46,9 +13,15 @@ class Student:
     telegram_id: str
     first_name: str
     last_name: str
-    gender: Gender
-    english_group: EnglishGroup
+    gender: str
+    english_group: str
+    info_group: str
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.telegram_id == other.telegram_id
+        else:
+            return False
 
 @dataclass
 class Homework:

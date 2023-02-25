@@ -115,7 +115,10 @@ async def send_new_marks(bot: Bot):
     else:
         print('Marks are changed')
         for mark in old_marks:
-            new_marks.remove(mark)
+            try:
+                new_marks.remove(mark)
+            except:
+                pass
         for mark in new_marks:
             try:
                 await bot.send_message(mark.student.telegram_id, f"У тебя новая отметка по предмету {mark.subject.name}: {prettify_marks(mark.mark)}")

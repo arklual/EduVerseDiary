@@ -65,7 +65,15 @@ class EduDiaryAPI:
             async with ses.get('http://93.181.225.54/educ_proc/ep_marks/', cookies=cookies, headers=headers) as r:
                 soup = BeautifulSoup(await r.text(), features='html.parser')
                 marks = soup.find_all('div', {'class': 'mark-row'})
+                for mark in marks:
+                    print(mark.text.strip().replace('\n', '').replace(' ', ''))
+                print('____________')
+                print(students)
                 result = []
+                petrov = list(filter(lambda x: x.last_name == 'Петров', students))
+                if class_id != CLASS_ID and petrov != []:
+                    students.remove(petrov[0])
+                    students.append(petrov[0])
                 if (len(marks) > len(students)):
                     for i in range(len(students)):
                         marks_row = marks[i+len(students)].text.strip().split('\n')
@@ -83,7 +91,32 @@ async def update_marks():
     marks = []
     for subject in subjects:
         api = EduDiaryAPI()
-        marks.append(await api.get_marks_in_subject(students=students, subject=subject))
+        if subject.id == '202':
+            sts = sorted(students, key=lambda x: x.english_group)
+            first = sts[0].english_group
+            second = sts[len(sts)-1].english_group
+            first = list(filter(lambda x: x.english_group == first, sts))
+            second = list(filter(lambda x: x.english_group == second, sts))
+            marks.append(await api.get_marks_in_subject(students=first, subject=subject, class_id=first[0].english_group))
+            marks.append(await api.get_marks_in_subject(students=second, subject=subject, class_id=second[0].english_group))
+        elif subject.id == '31':
+            sts = sorted(students, key=lambda x: x.info_group)
+            first = sts[0].info_group
+            second = sts[len(sts)-1].info_group
+            first = list(filter(lambda x: x.info_group == first, sts))
+            second = list(filter(lambda x: x.info_group == second, sts))
+            marks.append(await api.get_marks_in_subject(students=first, subject=subject, class_id=first[0].info_group))
+            marks.append(await api.get_marks_in_subject(students=second, subject=subject, class_id=second[0].info_group))
+        elif subject.id == '32':
+            sts = sorted(students, key=lambda x: x.gender)
+            first = sts[0].gender
+            second = sts[len(sts)-1].gender
+            first = list(filter(lambda x: x.gender == first, sts))
+            second = list(filter(lambda x: x.gender == second, sts))
+            marks.append(await api.get_marks_in_subject(students=first, subject=subject, class_id=first[0].gender))
+            marks.append(await api.get_marks_in_subject(students=second, subject=subject, class_id=second[0].gender))
+        else:
+            marks.append(await api.get_marks_in_subject(students=students, subject=subject))
         bar.next()
     bar.finish()
     await db.remove_marks()
