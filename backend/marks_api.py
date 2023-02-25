@@ -65,10 +65,6 @@ class EduDiaryAPI:
             async with ses.get('http://93.181.225.54/educ_proc/ep_marks/', cookies=cookies, headers=headers) as r:
                 soup = BeautifulSoup(await r.text(), features='html.parser')
                 marks = soup.find_all('div', {'class': 'mark-row'})
-                for mark in marks:
-                    print(mark.text.strip().replace('\n', '').replace(' ', ''))
-                print('____________')
-                print(students)
                 result = []
                 petrov = list(filter(lambda x: x.last_name == 'Петров', students))
                 if class_id != CLASS_ID and petrov != []:

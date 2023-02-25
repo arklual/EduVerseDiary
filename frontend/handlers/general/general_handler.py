@@ -1,9 +1,15 @@
 from aiogram.utils.markdown import hbold
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 import datetime
 from frontend import keyboards
+from aiogram.utils.exceptions import ChatNotFound
 from backend.databases.database import Database
 
+
+class Attantion(StatesGroup):
+    message = State()
 
 async def start(message: types.Message):
     db = await Database.setup()
@@ -30,6 +36,32 @@ async def help(message: types.Message):
     /get_notes - получить конспекты""", 
     reply_markup=keyboards.main())
 
+async def attention(message: types.Message, state: FSMContext):
+    await message.answer('Отправь текст объявления')
+    await state.set_state(Attantion.message.state)
+    #TODO: option to choose students
+
+async def send_attention(message: types.Message, state: FSMContext):
+    await state.update_data(message=message.text)
+    db = await Database.setup()
+    students = await db.get_students()
+    students = list(filter(lambda x: str(x.telegram_id) != str(message.from_user.id), students))
+    await db.close_connection()
+    not_sended_to = []
+    for student in students:
+        try:
+            await message.bot.send_message(student.telegram_id, message.text)
+        except ChatNotFound:
+            not_sended_to.append(student.last_name)
+            print('Unable to send: ', student.telegram_id, student.last_name)
+    await state.finish()
+    not_sended_to = str(not_sended_to).replace('[', '').replace(']', '').replace(', ', '\n').replace("'", "")
+    if not_sended_to != []:
+        await message.answer('Объявление разослано всему классу, кроме (у них нет чата с EduVerse Diary): ')
+        await message.answer(not_sended_to)
+    else:
+        await message.answer('Объявление разослано всему классу.')
+
 async def schedule(message: types.Message):
     await message.answer("""Расписание звонков сегодня:""")
     if datetime.date.today().isoweekday() == 1 or datetime.date.today().isoweekday() == 6:
@@ -41,5 +73,7 @@ async def setup(dp):
     print('Register general handler...', end='')
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(help, commands=['help'])
+    dp.register_message_handler(attention, commands=['attention'], state="*")
+    dp.register_message_handler(send_attention,  state=Attantion.message)
     dp.register_message_handler(schedule, lambda message: message.text == "⏰ Расписание звонков" or message.text == "/get_schedule")
     print('Succsess')

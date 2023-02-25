@@ -38,7 +38,7 @@ async def homework(call: types.CallbackQuery):
         date = datetime.date.today() + datetime.timedelta(days=1)
         while date.weekday() != code:
             date += datetime.timedelta(days=1)
-        hws = await middleware.homework(date + datetime.timedelta(days=7), call.from_user.id) #TODO EDIT BEFORE RELEASE
+        hws = await middleware.homework(date, call.from_user.id)
 
     
     await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main())
