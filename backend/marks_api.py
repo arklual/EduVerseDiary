@@ -5,7 +5,7 @@ from edutypes import Mark
 from backend.databases.database import Database
 from progress.bar import Bar
 CLASS_ID = '4180'
-PERIOD_ID = 'p_118'
+PERIOD_ID = 'p_119'
 USERNAME = '0339434'
 PASSWORD = '181230'
 
