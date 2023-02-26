@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from frontend import handlers_register
-from backend import marks_api
+import middleware
 import aioschedule
 from backend.databases.database import Database
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -15,11 +15,12 @@ async def main():
     dp = Dispatcher(bot, storage=storage)
     await handlers_register.setup(dp)
     await bot.delete_webhook(drop_pending_updates=True)
-    asyncio.create_task(scheduler())
+    asyncio.create_task(scheduler(bot))
     await dp.start_polling(bot)
 
-async def scheduler():
-    #aioschedule.every(2).minutes.do(marks_api.update_marks)
+async def scheduler(bot):
+    sender = middleware.Sender(bot)
+    aioschedule.every(2).minutes.do(sender.send_new_marks)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
