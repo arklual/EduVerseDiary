@@ -15,9 +15,9 @@ async def main():
     dp = Dispatcher(bot, storage=storage)
     await handlers_register.setup(dp)
     await bot.delete_webhook(drop_pending_updates=True)
-    asyncio.create_task(scheduler(bot))
-    sender = middleware.Sender(bot)
-    await sender.send_new_marks()
+    #asyncio.create_task(scheduler(bot))
+    #sender = middleware.Sender(bot)
+    #await sender.send_new_marks()
     await dp.start_polling(bot)
 
 async def scheduler(bot):
