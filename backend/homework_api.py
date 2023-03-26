@@ -1,5 +1,6 @@
 import aiohttp
 import datetime
+import json
 from backend.databases.database import Database
 
 database_id = '8b2cb4fdac3044f09ae3187392132482'
@@ -41,3 +42,35 @@ async def map_notion_result_to_homework(result):
         'files': files,
         'id': id
     }
+
+async def send_homework(subject, task, deadline):
+    db = await Database.setup()
+    token = await db.get_notion_token()
+    await db.close_connection()
+    async with aiohttp.ClientSession() as session:
+        await session.post(
+            'https://api.notion.com/v1/pages', 
+            headers ={
+                'Authorization': f'Bearer {token}',
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            data=json.dumps({
+                'parent': { "type": "database_id", "database_id": database_id },
+                'properties' : {
+                "Предмет": {
+                    "type": "multi_select",
+                    "multi_select": [{"name": subject}]
+                },
+                "Задание": {
+                    "type": "title",
+                    "title": [{"text": {"content": task}}]
+                },
+                "Deadline": {
+                    "type": "date",
+                    "date": { "start": deadline }
+                }
+                }
+            }
+        )
+)

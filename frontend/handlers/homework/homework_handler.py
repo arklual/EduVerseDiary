@@ -22,6 +22,12 @@ WEEKDAYS = [
 class HomeworkChoose(StatesGroup):
     homework = State()
 
+class AddHomework(StatesGroup):
+    subject = State()
+    task  = State()
+    deadline = State()
+    
+
 async def homework_menu(message: types.Message):
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=keyboards.week())
 
@@ -41,9 +47,9 @@ async def homework(call: types.CallbackQuery):
         hws = await middleware.homework(date, call.from_user.id)
 
     
-    await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main())
+    await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main('685823428'==str(call.message.from_user.id)))
     if hws == []:
-        await call.message.answer('Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main())
+        await call.message.answer('Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main('685823428'==str(call.message.from_user.id)))
     await call.answer()
     for hw in hws:
         db = await Database.setup()
@@ -68,10 +74,35 @@ async def is_done_changed(call: types.CallbackQuery):
     await call.answer()
     await call.message.edit_reply_markup(reply_markup=keyboards.is_done_checkbox(hw, is_done))
 
+async def add_homework(message: types.Message, state: FSMContext):
+    await message.answer('Выберите предмет', reply_markup=keyboards.add_subjects())
+    await state.set_state(AddHomework.subject.state)
+
+async def add_homework_subject_set(message: types.Message, state: FSMContext):
+    await state.update_data(subject = message.text)
+    await message.answer('Введите задание')
+    await state.set_state(AddHomework.task.state)
+
+async def add_homework_task_set(message: types.Message, state: FSMContext):
+    await state.update_data(task = message.text)
+    await message.answer('Введите дедлайн (в формате гггг-мм-дд)')
+    await state.set_state(AddHomework.deadline.state)
+async def add_homework_deadline_set(message: types.Message, state: FSMContext):
+    await state.update_data(deadline = message.text)
+    data = await state.get_data()
+    await state.finish()
+    await middleware.add_homework(data)
+    await message.answer('Отправлено ✅', reply_markup=keyboard_main('685823428'==str(message.from_user.id)))
+
+
 async def setup(dp):
     print('Register homework handler...', end='')
     dp.register_message_handler(homework_menu, lambda message: message.text == "📚 Домашнее задание" or message.text == "/get_homework")
     dp.register_callback_query_handler(homework, lambda c: c.data and c.data.startswith('homework'))
     dp.register_callback_query_handler(is_done_changed, lambda c: c.data and c.data.startswith('isdone'))
+    dp.register_message_handler(add_homework, lambda message: message.text == "/add_homework" or message.text == 'Загрузить д/з', state="*")
+    dp.register_message_handler(add_homework_subject_set, state=AddHomework.subject)
+    dp.register_message_handler(add_homework_task_set, state=AddHomework.task)
+    dp.register_message_handler(add_homework_deadline_set, state=AddHomework.deadline)
     print('Succsess')
 

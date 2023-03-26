@@ -43,6 +43,9 @@ async def homework(date, telegram_id):
     await db.close_connection()
     return hws
 
+async def add_homework(data):
+    await homework_api.send_homework(data['subject'], data['task'], data['deadline'])
+
 async def notes():
     notes = []
     data = await notes_api.get_notes()

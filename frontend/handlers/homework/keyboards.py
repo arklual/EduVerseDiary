@@ -30,3 +30,25 @@ def is_done_checkbox(homework, is_done=False):
     text = '✅ Сделано' if is_done else '❌ Не сделано'
     kb = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(text, callback_data=f'isdone{homework.task_id}'))
     return kb
+
+def add_subjects():
+    subjects = [
+        'Русский',
+        'Литература',
+        'ОБЖ',
+        'Английский',
+        'Алгебра',
+        'Информатика',
+        'Химия',
+        'Биология',
+        'Геометрия',
+        'История',
+        'Физика',
+        'Обществознание',
+        'Родной язык',
+        'Доп. Математика'
+    ]
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    for subject in subjects:
+        kb.add(subject)
+    return kb
