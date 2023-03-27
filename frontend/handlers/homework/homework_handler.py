@@ -24,9 +24,59 @@ class HomeworkChoose(StatesGroup):
 
 class AddHomework(StatesGroup):
     subject = State()
-    task  = State()
-    deadline = State()
+    task = State()
     
+
+async def get_deadline_weekday(s):
+    a = [
+        [
+            'Русский',
+            'Литература',
+            'История',
+            'ОБЖ',
+            'Английский'
+        ],
+        [
+            'Физика',
+            'Алгебра',
+            'Информатика'
+        ],
+        [
+            'Обществознание',
+            'Литература',
+            'Физика',
+            'Английский',
+            'Геометрия'
+        ],
+        [
+            'Обществознание',
+            'Биология',
+            'Алгебра'
+        ],
+        [
+            'Информатика',
+            'Химия',
+            'Английский',
+            'Биология'
+        ],
+        [
+            'Физика',
+            'Литература',
+            'Родной язык'
+        ]
+    ]
+    n = datetime.date.today().weekday()
+    for i in range(n+1, len(a)):
+        if s in a[i]:
+            for j in a[i]:
+                if j == s:
+                    return i
+
+    for i in range(len(a)):
+        if s in a[i]:
+            for j in a[i]:
+                if j == s:
+                    return i
 
 async def homework_menu(message: types.Message):
     await message.answer("На какой день Вы хотите получить д/з?", reply_markup=keyboards.week())
@@ -85,12 +135,18 @@ async def add_homework_subject_set(message: types.Message, state: FSMContext):
 
 async def add_homework_task_set(message: types.Message, state: FSMContext):
     await state.update_data(task = message.text)
-    await message.answer('Введите дедлайн (в формате гггг-мм-дд)')
-    await state.set_state(AddHomework.deadline.state)
-async def add_homework_deadline_set(message: types.Message, state: FSMContext):
-    await state.update_data(deadline = message.text)
     data = await state.get_data()
     await state.finish()
+    code = await get_deadline_weekday(data['subject'])
+    weekday = datetime.date.today().weekday() +1 
+    date = datetime.date.today() + datetime.timedelta(days=1)
+    if code == weekday:
+        pass
+    else:
+        date = datetime.date.today() + datetime.timedelta(days=1)
+        while date.weekday() != code:
+            date += datetime.timedelta(days=1)
+    data['deadline'] = str(date)
     await middleware.add_homework(data)
     await message.answer('Отправлено ✅', reply_markup=keyboard_main('685823428'==str(message.from_user.id)))
 
@@ -103,6 +159,5 @@ async def setup(dp):
     dp.register_message_handler(add_homework, lambda message: message.text == "/add_homework" or message.text == 'Загрузить д/з', state="*")
     dp.register_message_handler(add_homework_subject_set, state=AddHomework.subject)
     dp.register_message_handler(add_homework_task_set, state=AddHomework.task)
-    dp.register_message_handler(add_homework_deadline_set, state=AddHomework.deadline)
     print('Succsess')
 
