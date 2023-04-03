@@ -97,9 +97,9 @@ async def homework(call: types.CallbackQuery):
         hws = await middleware.homework(date, call.from_user.id)
 
     
-    await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main('685823428'==str(call.message.from_user.id)))
+    await call.message.answer('Домашнее задание: '+WEEKDAYS[date.weekday()], reply_markup=keyboard_main('685823428'==str(call.from_user.id)))
     if hws == []:
-        await call.message.answer('Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main('685823428'==str(call.message.from_user.id)))
+        await call.message.answer('Домашнего задания на этот день ещё нет.', reply_markup=keyboard_main('685823428'==str(call.from_user.id)))
     await call.answer()
     for hw in hws:
         db = await Database.setup()

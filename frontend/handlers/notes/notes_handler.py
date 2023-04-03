@@ -10,7 +10,7 @@ async def notes_menu(message: types.Message):
 
 async def subject_menu(call: types.CallbackQuery):
     subject = call.data[7:]
-    await call.message.answer(f'Выбери тему конспекта:', reply_markup=main_keyboard('685823428'==str(message.from_user.id)))
+    await call.message.answer(f'Выбери тему конспекта:', reply_markup=main_keyboard('685823428'==str(call.from_user.id)))
     themes = await middleware.get_themes_of_notes(subject)
     message = ''
     for i, theme in enumerate(themes):
