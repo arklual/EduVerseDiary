@@ -10,6 +10,7 @@ from backend.databases.database import Database
 
 class Attantion(StatesGroup):
     message = State()
+    to_pin = State()
 
 async def start(message: types.Message):
     db = await Database.setup()
@@ -41,8 +42,15 @@ async def attention(message: types.Message, state: FSMContext):
     await state.set_state(Attantion.message.state)
     #TODO: option to choose students
 
-async def send_attention(message: types.Message, state: FSMContext):
+async def attention_got_text(message: types.Message, state: FSMContext):
     await state.update_data(message=message.text)
+    await message.answer('Закреплять сообщение (да/нет)?', reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+    await state.set_state(Attantion.to_pin.state)
+
+async def send_attention(message: types.Message, state: FSMContext):
+    await state.update_data(to_pin=message.text)
+    data = await state.get_data()
+    await state.finish()
     db = await Database.setup()
     students = await db.get_students()
     students = list(filter(lambda x: str(x.telegram_id) != str(message.from_user.id), students))
@@ -50,12 +58,12 @@ async def send_attention(message: types.Message, state: FSMContext):
     not_sended_to = []
     for student in students:
         try:
-            at = await message.bot.send_message(student.telegram_id, message.text, reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
-            await message.bot.pin_chat_message(message.chat.id, message_id=at.message_id)
+            at = await message.bot.send_message(student.telegram_id, data['message'], reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+            if data['to_pin'] == 'да':
+                await message.bot.pin_chat_message(message.chat.id, message_id=at.message_id)
         except ChatNotFound:
             not_sended_to.append(student.last_name)
             print('Unable to send: ', student.telegram_id, student.last_name)
-    await state.finish()
     not_sended_to = str(not_sended_to).replace('[', '').replace(']', '').replace(', ', '\n').replace("'", "")
     if not_sended_to != []:
         await message.answer('Объявление разослано всему классу, кроме (у них нет чата с EduVerse Diary): ', reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
@@ -75,6 +83,7 @@ async def setup(dp):
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(help, commands=['help'])
     dp.register_message_handler(attention, commands=['attention'], state="*")
-    dp.register_message_handler(send_attention,  state=Attantion.message)
+    dp.register_message_handler(attention_got_text,  state=Attantion.message)
+    dp.register_message_handler(send_attention,  state=Attantion.to_pin)
     dp.register_message_handler(schedule, lambda message: message.text == "⏰ Расписание звонков" or message.text == "/get_schedule")
     print('Succsess')
