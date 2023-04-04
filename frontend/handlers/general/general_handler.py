@@ -50,7 +50,8 @@ async def send_attention(message: types.Message, state: FSMContext):
     not_sended_to = []
     for student in students:
         try:
-            await message.bot.send_message(student.telegram_id, message.text, reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+            at = await message.bot.send_message(student.telegram_id, message.text, reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+            await message.bot.pin_chat_message(message.chat.id, message_id=at.message_id)
         except ChatNotFound:
             not_sended_to.append(student.last_name)
             print('Unable to send: ', student.telegram_id, student.last_name)
