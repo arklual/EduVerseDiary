@@ -58,7 +58,7 @@ async def send_attention(message: types.Message, state: FSMContext):
     not_sended_to = []
     for student in students:
         try:
-            at = await message.bot.send_message(student.telegram_id, data['message'], reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+            at = await message.bot.send_message(student.telegram_id, data['message'], reply_markup=keyboards.main())
             if data['to_pin'] == 'да':
                 await message.bot.pin_chat_message(message.chat.id, message_id=at.message_id)
         except ChatNotFound:
@@ -66,10 +66,10 @@ async def send_attention(message: types.Message, state: FSMContext):
             print('Unable to send: ', student.telegram_id, student.last_name)
     not_sended_to = str(not_sended_to).replace('[', '').replace(']', '').replace(', ', '\n').replace("'", "")
     if not_sended_to != []:
-        await message.answer('Объявление разослано всему классу, кроме (у них нет чата с EduVerse Diary): ', reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
-        await message.answer(not_sended_to, reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+        await message.answer('Объявление разослано всему классу, кроме (у них нет чата с EduVerse Diary): ', reply_markup=keyboards.main())
+        await message.answer(not_sended_to, reply_markup=keyboards.main())
     else:
-        await message.answer('Объявление разослано всему классу.', reply_markup=keyboards.main('685823428'==str(message.from_user.id)))
+        await message.answer('Объявление разослано всему классу.', reply_markup=keyboards.main())
 
 async def schedule(message: types.Message):
     await message.answer("""Расписание звонков сегодня:""")

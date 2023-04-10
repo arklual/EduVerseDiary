@@ -34,9 +34,17 @@ async def notes(call: types.CallbackQuery):
             i += 1
     await call.answer()
 
+async def geo_menu(message: types.Message):
+    themes = await middleware.get_themes_of_notes('Геометрия')
+    answer = 'Блок 1:'
+    for i, theme in enumerate(themes):
+        answer += f'{i+1}. {theme}\n'
+    await message.answer(answer, reply_markup=keyboards.themes('Геометрия', len(themes)))  
+
 async def setup(dp):
     print('Register notes handler...', end='')
     dp.register_message_handler(notes_menu, lambda message: message.text == "📒 Конспекты" or message.text == "/get_notes")
     dp.register_callback_query_handler(subject_menu, lambda c: c.data and c.data.startswith('subject'))
     dp.register_callback_query_handler(notes, lambda c: c.data and c.data.startswith('theme'))
+    dp.register_message_handler(geo_menu, lambda message: message.text == "📒 Зачёт (геометрия)")
     print('Succsess')
