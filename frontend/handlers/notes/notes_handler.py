@@ -36,7 +36,7 @@ async def notes(call: types.CallbackQuery):
 
 async def geo_menu(message: types.Message):
     themes = await middleware.get_themes_of_notes('Геометрия')
-    answer = 'Блок 1:'
+    answer = 'Блок 1:\n'
     for i, theme in enumerate(themes):
         answer += f'{i+1}. {theme}\n'
     await message.answer(answer, reply_markup=keyboards.themes('Геометрия', len(themes)))  
