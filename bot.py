@@ -21,12 +21,11 @@ async def main():
     await dp.start_polling(bot)
 
 async def scheduler(bot):
-    pass
-    #sender = middleware.Sender(bot)
-    #aioschedule.every(10).minutes.do(sender.send_new_marks)
-    #while True:
-    #    await aioschedule.run_pending()
-    #    await asyncio.sleep(1)
+    sender = middleware.Sender(bot)
+    aioschedule.every(10).minutes.do(sender.send_new_marks)
+    while True:
+        await aioschedule.run_pending()
+        await asyncio.sleep(1)
 
 if __name__ == "__main__":
     asyncio.run(main())
