@@ -119,10 +119,10 @@ async def is_done_changed(call: types.CallbackQuery):
     db = await Database.setup()
     is_done = await db.is_homework_done(hw, await db.get_student_by_id(call.from_user.id))
     is_done = not is_done
-    await db.change_homework_done(hw, await db.get_student_by_id(call.from_user.id), is_done)
-    await db.close_connection()
     await call.answer()
     await call.message.edit_reply_markup(reply_markup=keyboards.is_done_checkbox(hw, is_done))
+    await db.change_homework_done(hw, await db.get_student_by_id(call.from_user.id), is_done)
+    await db.close_connection()
 
 async def add_homework(message: types.Message, state: FSMContext):
     await message.answer('Выберите предмет', reply_markup=keyboards.add_subjects())

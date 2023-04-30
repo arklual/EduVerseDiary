@@ -61,6 +61,7 @@ async def send_attention(message: types.Message, state: FSMContext):
             at = await message.bot.send_message(student.telegram_id, data['message'], reply_markup=keyboards.main())
             if data['to_pin'] == 'да':
                 await message.bot.pin_chat_message(message.chat.id, message_id=at.message_id)
+                # FIXME
         except ChatNotFound:
             not_sended_to.append(student.last_name)
             print('Unable to send: ', student.telegram_id, student.last_name)
