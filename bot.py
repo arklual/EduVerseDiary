@@ -5,6 +5,7 @@ import middleware
 import aioschedule
 from backend.databases.database import Database
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from backend import homework_api
 
 
 async def main():
@@ -23,6 +24,7 @@ async def main():
 async def scheduler(bot):
     sender = middleware.Sender(bot)
     aioschedule.every(10).minutes.do(sender.send_new_marks)
+    aioschedule.every(1).hour.do(homework_api.update_hash)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)

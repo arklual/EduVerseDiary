@@ -5,8 +5,11 @@ from backend.databases.database import Database
 
 database_id = '8b2cb4fdac3044f09ae3187392132482'
 
+hash = {}
 
 async def get_homework(date):
+    if hash.get(date.isoformat()) is not None:
+        return hash.get(date.isoformat())
     db = await Database.setup()
     token = await db.get_notion_token()
     await db.close_connection()
@@ -25,6 +28,7 @@ async def get_homework(date):
                 homework_dict = await map_notion_result_to_homework(homework)
                 if homework_dict['deadline'] == str(date):
                     homeworks.append(homework_dict)
+            hash[date.isoformat()] = homeworks
             return homeworks
 
 
@@ -74,3 +78,11 @@ async def send_homework(subject, task, deadline):
             }
         )
 )
+
+async def update_hash():
+    global hash
+    hash = {}
+    date = datetime.date.today() + datetime.timedelta(days=1)
+    if datetime.date.today().isoweekday() == 6:
+        date += datetime.timedelta(days=1)
+    hash[date.isoformat()] = await get_homework(date)
