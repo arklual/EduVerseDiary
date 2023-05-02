@@ -82,7 +82,7 @@ async def send_homework(subject, task, deadline):
 async def update_hash():
     global hash
     hash = {}
-    date = datetime.date.today() + datetime.timedelta(days=1)
-    if datetime.date.today().isoweekday() == 6:
+    date = datetime.date.today()
+    for i in range(8):
+        hash[date.isoformat()] = await get_homework(date)
         date += datetime.timedelta(days=1)
-    hash[date.isoformat()] = await get_homework(date)
