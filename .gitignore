@@ -1,3 +1,4 @@
 *.pyc 
 *.log
 *.sqlite3
+backend/databases/data.sqlite3
