@@ -173,7 +173,7 @@ async def inline_homework(inline_query: types.InlineQuery):
             photo_url=hw['files'][0]['file']['url']
         ) for i, hw in enumerate(hws) if hw['files'] != []
     ]
-    await inline_query.answer(result, switch_pm_text='Перейти в бота', switch_pm_parameter='go', cache_time=1)
+    await inline_query.answer(result, switch_pm_text='Перейти в бота', switch_pm_parameter='go', cache_time=3600)
 
 async def setup(dp: Dispatcher):
     print('Register homework handler...', end='')
