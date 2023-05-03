@@ -18,8 +18,8 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     asyncio.create_task(scheduler(bot))
     sender = middleware.Sender(bot)
-    await sender.send_new_marks()
-    await homework_api.update_hash()
+    #await sender.send_new_marks()
+    #await homework_api.update_hash()
     await dp.start_polling(bot)
 
 async def scheduler(bot):

@@ -152,17 +152,28 @@ async def add_homework_task_set(message: types.Message, state: FSMContext):
     await message.answer('Отправлено ✅', reply_markup=keyboard_main('685823428'==str(message.from_user.id)))
 
 async def inline_homework(inline_query: types.InlineQuery):
-    date = datetime.date.today()
+    date = datetime.date.today() + datetime.timedelta(days=1)
+    if date.isoweekday() == 7:
+        date += datetime.timedelta(days=1) 
     hws = await homework_api.get_homework(date)
-    text = str(hws)
-    input_content = types.InputTextMessageContent(text)
-    result_id: str = types.hashlib.md5(text.encode()).hexdigest()
-    item = types.InlineQueryResultArticle(
-        id=result_id,
-        title=f'Result {text!r}',
-        input_message_content=input_content,
-    )
-    await inline_query.bot.answer_inline_query(inline_query.id, results=[item], cache_time=1)
+    result = [types.InlineQueryResultArticle(
+        id=i,
+        title=hw['subject'],
+        description=hw['task'],
+        input_message_content=types.InputTextMessageContent(
+            message_text=f"<b>{hw['subject']}</b>\n{hw['task']}",
+            parse_mode="HTML"
+        )) for i, hw in enumerate(hws) if hw['files'] == []]
+    result += [
+        types.InlineQueryResultPhoto(
+            id=i,
+            title=f"{hw['subject']}",
+            caption=f"<b>{hw['subject']}</b>\n{hw['task']}",
+            thumb_url=hw['files'][0]['file']['url'],
+            photo_url=hw['files'][0]['file']['url']
+        ) for i, hw in enumerate(hws) if hw['files'] != []
+    ]
+    await inline_query.answer(result, switch_pm_text='Перейти в бота', switch_pm_parameter='go', cache_time=1)
 
 async def setup(dp: Dispatcher):
     print('Register homework handler...', end='')
