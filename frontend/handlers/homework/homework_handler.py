@@ -1,12 +1,13 @@
 from . import keyboards
 from frontend.keyboards import main as keyboard_main
-from aiogram import types
+from aiogram import types, Dispatcher
 from aiogram.utils.markdown import hbold
 import datetime
 import middleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from backend.databases.database import Database
+from backend import homework_api
 import edutypes
 
 WEEKDAYS = [
@@ -150,8 +151,20 @@ async def add_homework_task_set(message: types.Message, state: FSMContext):
     await middleware.add_homework(data)
     await message.answer('Отправлено ✅', reply_markup=keyboard_main('685823428'==str(message.from_user.id)))
 
+async def inline_homework(inline_query: types.InlineQuery):
+    date = datetime.date.today()
+    hws = await homework_api.get_homework(date)
+    text = str(hws)
+    input_content = types.InputTextMessageContent(text)
+    result_id: str = types.hashlib.md5(text.encode()).hexdigest()
+    item = types.InlineQueryResultArticle(
+        id=result_id,
+        title=f'Result {text!r}',
+        input_message_content=input_content,
+    )
+    await inline_query.bot.answer_inline_query(inline_query.id, results=[item], cache_time=1)
 
-async def setup(dp):
+async def setup(dp: Dispatcher):
     print('Register homework handler...', end='')
     dp.register_message_handler(homework_menu, lambda message: message.text == "📚 Домашнее задание" or message.text == "/get_homework")
     dp.register_callback_query_handler(homework, lambda c: c.data and c.data.startswith('homework'))
@@ -159,5 +172,6 @@ async def setup(dp):
     dp.register_message_handler(add_homework, lambda message: message.text == "/add_homework" or message.text == 'Загрузить д/з', state="*")
     dp.register_message_handler(add_homework_subject_set, state=AddHomework.subject)
     dp.register_message_handler(add_homework_task_set, state=AddHomework.task)
+    dp.register_inline_handler(inline_homework)
     print('Succsess')
 
