@@ -5,8 +5,7 @@ import middleware
 import aioschedule
 from backend.databases.database import Database
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from backend import homework_api
-
+from backend import homework_api, marks_api
 
 async def main():
     db = await Database.setup()
@@ -20,12 +19,14 @@ async def main():
     sender = middleware.Sender(bot)
     await sender.send_new_marks()
     await homework_api.update_hash()
+    await marks_api.get_final_marks()
     await dp.start_polling(bot)
 
 async def scheduler(bot):
     sender = middleware.Sender(bot)
     aioschedule.every(10).minutes.do(sender.send_new_marks)
     aioschedule.every(1).hour.do(homework_api.update_hash)
+    aioschedule.every(1).hour.do(marks_api.get_final_marks)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)

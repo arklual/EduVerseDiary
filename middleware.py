@@ -99,6 +99,22 @@ async def marks(telegram_id):
         messages[i] = message.split(': ')[0] + f' {sign}{average_mark}: ' + message.split(': ')[1]
     return messages
 
+async def finals(telegram_id):
+    messages = []
+    telegram_id = str(telegram_id)
+    marks = marks_api.finals[telegram_id]
+    subjects = {}
+    for mark in marks:
+        subjects[mark.subject.name] = []
+    for mark in marks:
+        subjects[mark.subject.name].append(mark.mark)
+    for s, m in subjects.items():
+        ms = str(m).replace('[', '').replace(']', '').replace(',', '').replace(' ', '').replace('\'', '')
+        ms = prettify_marks(ms)
+        mes = f'{s}: {ms}'
+        messages.append(mes)
+    return messages
+
 class Sender:
     def __init__(self, bot) -> None:
         self.bot = bot
