@@ -16,17 +16,17 @@ async def main():
     await handlers_register.setup(dp)
     await bot.delete_webhook(drop_pending_updates=True)
     asyncio.create_task(scheduler(bot))
-    sender = middleware.Sender(bot)
-    await sender.send_new_marks()
+    #sender = middleware.Sender(bot)
+    #await sender.send_new_marks()
     await homework_api.update_hash()
-    await marks_api.get_final_marks()
+    #await marks_api.get_final_marks()
     await dp.start_polling(bot)
 
 async def scheduler(bot):
-    sender = middleware.Sender(bot)
-    aioschedule.every(10).minutes.do(sender.send_new_marks)
+    #sender = middleware.Sender(bot)
+    #aioschedule.every(10).minutes.do(sender.send_new_marks)
     aioschedule.every(1).hour.do(homework_api.update_hash)
-    aioschedule.every(1).hour.do(marks_api.get_final_marks)
+    #aioschedule.every(1).hour.do(marks_api.get_final_marks)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
