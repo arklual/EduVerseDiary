@@ -14,6 +14,6 @@ async def finals(message: types.Message):
 
 async def setup(dp):
     print('Register marks handler...', end='')
-    #dp.register_message_handler(marks, lambda message: message.text == "🧮 Оценки" or message.text == "/get_marks")
+    dp.register_message_handler(marks, lambda message: message.text == "🧮 Оценки" or message.text == "/get_marks")
     #dp.register_message_handler(finals, lambda message: message.text == "🧮 Итоговые" or message.text == "/finals")
     print('Succsess')

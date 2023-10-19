@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 from edutypes import Mark
 from backend.databases.database import Database
 from progress.bar import Bar
-CLASS_ID = '4180'
-PERIOD_ID = 'p_119'
+CLASS_ID = '4551'
+PERIOD_ID = 'p_120'
 USERNAME = '0339434'
 PASSWORD = '181230'
 
@@ -69,11 +69,8 @@ class EduDiaryAPI:
             async with ses.get('http://93.181.225.54/educ_proc/ep_marks/', cookies=cookies, headers=headers) as r:
                 soup = BeautifulSoup(await r.text(), features='html.parser')
                 marks = soup.find_all('div', {'class': 'mark-row'})
+                print(await r.text())
                 result = []
-                petrov = list(filter(lambda x: x.last_name == 'Петров', students))
-                if class_id != CLASS_ID and petrov != []:
-                    students.remove(petrov[0])
-                    students.append(petrov[0])
                 if (len(marks) > len(students)):
                     for i in range(len(students)):
                         marks_row = marks[i+len(students)].text.strip().split('\n')
