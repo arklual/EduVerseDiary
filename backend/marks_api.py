@@ -55,6 +55,7 @@ class EduDiaryAPI:
                 'group_type_id': '1',
                 'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
                 'subject_id': str(subject.id),
+                'role_key': 'oou_teacher_gr'
             }
             headers = {
                 'Connection': 'keep-alive',
@@ -88,6 +89,7 @@ class EduDiaryAPI:
                 'group_type_id': '1',
                 'csrftoken': 'yryiF3SDU9Ubj3WCXsQmayNnTNR6zRWINmaAajUgek0JNq2rqlpXyr2QPQ8StUhj',
                 'subject_id': str(subject.id),
+                'role_key': 'oou_teacher_gr'
             }
             headers = {
                 'Connection': 'keep-alive',
@@ -121,12 +123,18 @@ async def update_marks():
     subjects = await db.get_subjects()
     students = await db.get_students()
     mel = None
+    sharov = None
     for i, s in enumerate(students):
         if s.last_name == 'Мельников':
             mel = s
             students.pop(i)
             break
+        if s.last_name == 'Шаров':
+            sharov = s
+            students.pop(i)
+            break
     students.append(mel)
+    students.append(sharov)
     bar = Bar('Getting marks', max=len(subjects))
     marks = []
     for subject in subjects:
