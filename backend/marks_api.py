@@ -122,17 +122,18 @@ async def update_marks():
     subjects = await db.get_subjects()
     students = await db.get_students()
     mel = None
-    sharov = None
     for i, s in enumerate(students):
         if s.last_name == 'Мельников':
             mel = s
             students.pop(i)
             break
+    sharov = None
+    students.append(mel)
+    for i, s in enumerate(students):
         if s.last_name == 'Шаров':
             sharov = s
             students.pop(i)
             break
-    students.append(mel)
     students.append(sharov)
     bar = Bar('Getting marks', max=len(subjects))
     marks = []
