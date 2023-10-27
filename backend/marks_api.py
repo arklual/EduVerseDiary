@@ -70,7 +70,6 @@ class EduDiaryAPI:
             async with ses.get('http://93.181.225.54/educ_proc/ep_marks/', cookies=cookies, headers=headers) as r:
                 soup = BeautifulSoup(await r.text(), features='html.parser')
                 marks = soup.find_all('div', {'class': 'mark-row'})
-                print(await r.text())
                 result = []
                 if (len(marks) > len(students)):
                     for i in range(len(students)):
