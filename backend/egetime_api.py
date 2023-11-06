@@ -27,20 +27,19 @@ async def get_egetime(date):
 
 
 async def map_notion_result_to_egetime(result):
-    print(result)
     properties = result['properties']
-    task = properties['Task']['title'][0]['text']['content']
+    task = properties['Task']['rich_text'][0]['text']['content']
     is_test = properties['Is test']['checkbox']
     date = properties['Date']['date']['start']
     photo = properties['Photo']['files']
     try:
         answers =[
-            properties['Answer 1']['title'][0]['text']['content'],
-            properties['Answer 2']['title'][0]['text']['content'],
-            properties['Answer 3']['title'][0]['text']['content'],
-            properties['Answer 4']['title'][0]['text']['content'],
-            properties['Answer 5']['title'][0]['text']['content'],
-            properties['Answer 6']['title'][0]['text']['content'],
+            properties['Answer 1']['rich_text'][0]['text']['content'],
+            properties['Answer 2']['rich_text'][0]['text']['content'],
+            properties['Answer 3']['rich_text'][0]['text']['content'],
+            properties['Answer 4']['rich_text'][0]['text']['content'],
+            properties['Answer 5']['rich_text'][0]['text']['content'],
+            properties['Answer 6']['rich_text'][0]['text']['content'],
         ]
     except:
         answers = []
