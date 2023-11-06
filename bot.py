@@ -1,4 +1,6 @@
 import asyncio
+import datetime
+
 from aiogram import Bot, Dispatcher
 from frontend import handlers_register
 import middleware
@@ -22,10 +24,14 @@ async def main():
     #await marks_api.get_final_marks()
     await dp.start_polling(bot)
 
+
+
+
 async def scheduler(bot):
     sender = middleware.Sender(bot)
     aioschedule.every(10).minutes.do(sender.send_new_marks)
-    aioschedule.every(1).hour.do(homework_api.update_hash)
+    aioschedule.every(15).minutes.do(homework_api.update_hash)
+    aioschedule.every(1).day.at('14:00').do(sender.egetime_send)
     #aioschedule.every(1).hour.do(marks_api.get_final_marks)
     while True:
         await aioschedule.run_pending()

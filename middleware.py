@@ -1,4 +1,6 @@
-from backend import homework_api, notes_api, marks_api
+import datetime
+
+from backend import homework_api, notes_api, marks_api, egetime_api
 from edutypes import Homework, Note, Mark
 from backend.databases.database import Database
 from collections import Counter
@@ -118,8 +120,27 @@ async def finals(telegram_id):
 class Sender:
     def __init__(self, bot) -> None:
         self.bot = bot
-    
-    
+
+    async def egetime_send(self):
+        db = await Database.setup()
+        students = await db.get_students()
+        await db.close_connection()
+        egetime_today = await egetime_api.get_egetime(datetime.datetime.today())
+        for t in egetime_today:
+            for student in students:
+                try:
+                    if len(t['photo']) == 1:
+                        await self.bot.send_photo(student.telegram_id, t['photo'][0]['file']['url'], caption=f'#ЕГЭtime')
+                    else:
+                        await self.bot.send_message(student.telegram_id, f'#ЕГЭtime')
+                    if t['is_test']:
+                        try:
+                            answer = t['answers'][0]
+                            answers = sorted(t['answers'])
+                            answ_index = answers.index(answer)
+                            await self.bot.send_poll(student.telegram_id, t['task'], answers, type='quiz', correct_option_id=answ_index)
+                        except: pass
+                except: pass
     async def send_new_marks(self):
         db = await Database.setup()
         old_marks = []
