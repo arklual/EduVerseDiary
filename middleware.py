@@ -125,7 +125,7 @@ class Sender:
         db = await Database.setup()
         students = await db.get_students()
         await db.close_connection()
-        egetime_today = await egetime_api.get_egetime(datetime.date.today())
+        egetime_today = await egetime_api.get_egetime(datetime.date.today()+datetime.timedelta(days=1))
         for t in egetime_today:
             for student in students:
                 try:
@@ -140,6 +140,9 @@ class Sender:
                             answ_index = answers.index(answer)
                             await self.bot.send_poll(student.telegram_id, t['task'], answers, type='quiz', correct_option_id=answ_index, is_anonymous=True)
                         except Exception as e: print(e)
+                    else:
+                        try: await self.bot.send_message(student.telegram_id, t['task'])
+                        except: pass
                 except Exception as e: print(e)
     async def send_new_marks(self):
         db = await Database.setup()
