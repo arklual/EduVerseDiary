@@ -125,7 +125,7 @@ class Sender:
         db = await Database.setup()
         students = await db.get_students()
         await db.close_connection()
-        egetime_today = await egetime_api.get_egetime(datetime.date.today()+datetime.timedelta(days=1))
+        egetime_today = await egetime_api.get_egetime(datetime.date.today())
         for t in egetime_today:
             for student in students:
                 try:
