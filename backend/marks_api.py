@@ -5,7 +5,7 @@ from edutypes import Mark
 from backend.databases.database import Database
 from progress.bar import Bar
 CLASS_ID = '4551'
-PERIOD_ID = 'p_120'
+PERIOD_ID = 'p_121'
 USERNAME = '0339434'
 PASSWORD = '181230'
 
@@ -121,20 +121,6 @@ async def update_marks():
     db = await Database.setup()
     subjects = await db.get_subjects()
     students = await db.get_students()
-    mel = None
-    for i, s in enumerate(students):
-        if s.last_name == 'Мельников':
-            mel = s
-            students.pop(i)
-            break
-    sharov = None
-    students.append(mel)
-    for i, s in enumerate(students):
-        if s.last_name == 'Шаров':
-            sharov = s
-            students.pop(i)
-            break
-    students.append(sharov)
     bar = Bar('Getting marks', max=len(subjects))
     marks = []
     for subject in subjects:
