@@ -5,7 +5,7 @@ from edutypes import Homework, Note, Mark
 from backend.databases.database import Database
 from collections import Counter
 from aiogram.utils.exceptions import ChatNotFound
-from aiogram import Bot
+from aiogram import Bot, types
 from backend.marks_api import update_marks
 import middleware
 
@@ -118,7 +118,7 @@ async def finals(telegram_id):
     return messages
 
 class Sender:
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: Bot) -> None:
         self.bot = bot
 
     async def egetime_send(self):
@@ -129,10 +129,12 @@ class Sender:
         for t in egetime_today:
             for student in students:
                 try:
-                    if len(t['photo']) == 1:
-                        await self.bot.send_photo(student.telegram_id, t['photo'][0]['file']['url'], caption=f'#ЕГЭtime')
-                    else:
-                        await self.bot.send_message(student.telegram_id, f'#ЕГЭtime')
+                    await self.bot.send_message(student.telegram_id, f'#ЕГЭtime')
+                    if len(t['photo']) != 0:
+                        media = types.MediaGroup()
+                        for file in t['photo']:
+                            media.attach_photo(file['file']['url'])
+                        await self.bot.send_media_group(student.telegram_id, media)
                     if t['is_test']:
                         try:
                             answer = t['answers'][0]
@@ -141,9 +143,11 @@ class Sender:
                             await self.bot.send_poll(student.telegram_id, t['task'], answers, type='quiz', correct_option_id=answ_index, is_anonymous=True)
                         except Exception as e: print(e)
                     else:
-                        try: await self.bot.send_message(student.telegram_id, t['task'])
+                        try:
+                            await self.bot.send_message(student.telegram_id, t['task'])
                         except: pass
                 except Exception as e: print(e)
+
     async def send_new_marks(self):
         db = await Database.setup()
         old_marks = []
